@@ -1,0 +1,27 @@
+node_modules/
+dist/
+build/
+coverage/
+
+*.log
+npm-debug.log*
+.npm/
+
+# base de datos local
+server/data/*.db
+server/data/*.db-shm
+server/data/*.db-wal
+server/data/videos/
+
+.env
+.env.local
+.env.*.local
+
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+.cache/
+.vite/
