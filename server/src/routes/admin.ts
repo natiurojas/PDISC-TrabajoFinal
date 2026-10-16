@@ -31,6 +31,7 @@ import {
 } from '../lib/validate.js';
 import { currentUser, requirePermission } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/index.js';
+import { requireParam } from '../lib/query.js';
 import { parseMovieInput } from '../services/movieInput.js';
 
 export const adminRouter = Router();
@@ -94,10 +95,11 @@ adminRouter.put(
   '/movies/:idOrSlug',
   requirePermission('movies:write'),
   asyncHandler(async (req, res) => {
-    const movie = resolveMovie(req.params.idOrSlug);
+    const idOrSlug = requireParam(req.params.idOrSlug, 'idOrSlug');
+    const movie = resolveMovie(idOrSlug);
     const input = parseMovieInput(req.body);
     const updated = updateMovie(movie.id, input);
-    if (!updated) throw ApiError.notFound(`No existe la pelicula "${req.params.idOrSlug}"`);
+    if (!updated) throw ApiError.notFound(`No existe la pelicula "${idOrSlug}"`);
     res.json(updated);
   }),
 );
@@ -106,7 +108,7 @@ adminRouter.patch(
   '/movies/:idOrSlug/featured',
   requirePermission('movies:write'),
   asyncHandler(async (req, res) => {
-    const movie = resolveMovie(req.params.idOrSlug);
+    const movie = resolveMovie(requireParam(req.params.idOrSlug, 'idOrSlug'));
     const body = asBody(req.body);
     const featured = requireBoolean(body.featured, 'featured');
 
@@ -139,7 +141,7 @@ adminRouter.delete(
   '/movies/:idOrSlug',
   requirePermission('movies:write'),
   asyncHandler(async (req, res) => {
-    const movie = resolveMovie(req.params.idOrSlug);
+    const movie = resolveMovie(requireParam(req.params.idOrSlug, 'idOrSlug'));
     deleteMovie(movie.id);
     res.json({ ok: true, message: `Pelicula "${movie.title}" eliminada`, id: movie.id });
   }),
@@ -163,7 +165,7 @@ adminRouter.delete(
   '/genres/:id',
   requirePermission('genres:write'),
   asyncHandler(async (req, res) => {
-    const id = Number.parseInt(req.params.id, 10);
+    const id = Number.parseInt(requireParam(req.params.id, 'id'), 10);
     if (!Number.isInteger(id)) throw ApiError.badRequest('Id de genero invalido');
     if (!deleteGenre(id)) throw ApiError.notFound('No existe ese genero');
     res.json({ ok: true, id });
@@ -187,24 +189,20 @@ adminRouter.get(
   '/users',
   requirePermission('users:read'),
   asyncHandler(async (req, res) => {
-    const roleParam = typeof req.query.role === 'string' ? req.query.role : undefined;
-    if (roleParam && !isRole(roleParam)) {
-      throw ApiError.badRequest('Rol invalido en el filtro');
+    const roleParam =
+      typeof req.query.role === 'string' && req.query.role !== '' ? req.query.role : undefined;
+
+    let role: Role | undefined;
+    if (roleParam) {
+      if (!isRole(roleParam)) throw ApiError.badRequest('Rol invalido en el filtro');
+      role = roleParam;
     }
 
     const page = Math.max(Number.parseInt(String(req.query.page ?? '1'), 10) || 1, 1);
     const limit = Math.min(Math.max(Number.parseInt(String(req.query.limit ?? '20'), 10) || 20, 1), 100);
+    const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
 
-    res.json(
-      listUsers({
-        ...(typeof req.query.search === 'string' && req.query.search
-          ? { search: req.query.search }
-          : {}),
-        ...(roleParam ? { role: roleParam } : {}),
-        page,
-        limit,
-      }),
-    );
+    res.json(listUsers({ search, role, page, limit }));
   }),
 );
 
@@ -232,7 +230,7 @@ adminRouter.patch(
   '/users/:id',
   requirePermission('users:write'),
   asyncHandler(async (req, res) => {
-    const target = resolveUser(req.params.id);
+    const target = resolveUser(requireParam(req.params.id, 'id'));
     const actor = currentUser(req);
     const body = asBody(req.body);
 
@@ -270,7 +268,7 @@ adminRouter.delete(
   '/users/:id',
   requirePermission('users:write'),
   asyncHandler(async (req, res) => {
-    const target = resolveUser(req.params.id);
+    const target = resolveUser(requireParam(req.params.id, 'id'));
     const actor = currentUser(req);
 
     if (target.id === actor.id) {

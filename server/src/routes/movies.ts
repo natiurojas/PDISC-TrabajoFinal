@@ -8,6 +8,7 @@ import {
   parseIntOr,
   parseList,
   parseNumberOrUndefined,
+  requireParam,
 } from '../lib/query.js';
 import { asyncHandler } from '../middleware/index.js';
 import { openStream } from '../services/stream.js';
@@ -43,8 +44,9 @@ moviesRouter.get(
 moviesRouter.get(
   '/:idOrSlug',
   asyncHandler(async (req, res) => {
-    const movie = findMovieByIdOrSlug(req.params.idOrSlug);
-    if (!movie) throw ApiError.notFound(`No existe la pelicula "${req.params.idOrSlug}"`);
+    const idOrSlug = requireParam(req.params.idOrSlug, 'idOrSlug');
+    const movie = findMovieByIdOrSlug(idOrSlug);
+    if (!movie) throw ApiError.notFound(`No existe la pelicula "${idOrSlug}"`);
 
     res.json(movie);
   }),
@@ -53,8 +55,9 @@ moviesRouter.get(
 moviesRouter.get(
   '/:idOrSlug/similar',
   asyncHandler(async (req, res) => {
-    const movie = findMovieByIdOrSlug(req.params.idOrSlug);
-    if (!movie) throw ApiError.notFound(`No existe la pelicula "${req.params.idOrSlug}"`);
+    const idOrSlug = requireParam(req.params.idOrSlug, 'idOrSlug');
+    const movie = findMovieByIdOrSlug(idOrSlug);
+    if (!movie) throw ApiError.notFound(`No existe la pelicula "${idOrSlug}"`);
 
     const limit = parseIntOr(req.query.limit, 8, { min: 1, max: 24 });
     res.json({ items: listSimilar(movie, limit) });
@@ -62,8 +65,9 @@ moviesRouter.get(
 );
 
 const streamHandler = asyncHandler(async (req, res) => {
-  const movie = findMovieByIdOrSlug(req.params.idOrSlug);
-  if (!movie) throw ApiError.notFound(`No existe la pelicula "${req.params.idOrSlug}"`);
+  const idOrSlug = requireParam(req.params.idOrSlug, 'idOrSlug');
+  const movie = findMovieByIdOrSlug(idOrSlug);
+  if (!movie) throw ApiError.notFound(`No existe la pelicula "${idOrSlug}"`);
 
   const target = await openStream(movie, req.headers.range, req.method === 'HEAD');
 

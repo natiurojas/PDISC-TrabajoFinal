@@ -13,7 +13,7 @@ import { authRouter } from './routes/auth.js';
 import { facetsRouter, genresRouter } from './routes/catalog.js';
 import { moviesRouter } from './routes/movies.js';
 
-const CLIENT_DIST = path.join(config.rootDir, '..', 'client', 'dist');
+const CLIENT_DIST = path.join(config.rootDir, 'client', 'dist');
 
 export function createApp(): express.Express {
   const app = express();

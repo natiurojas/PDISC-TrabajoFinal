@@ -8,10 +8,10 @@ npm-debug.log*
 .npm/
 
 # base de datos local
-server/data/*.db
-server/data/*.db-shm
-server/data/*.db-wal
-server/data/videos/
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/videos/
 
 .env
 .env.local

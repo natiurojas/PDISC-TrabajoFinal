@@ -1,5 +1,11 @@
 import { ApiError } from './errors.js';
 
+/** `req.params.x` es `string | undefined` con noUncheckedIndexedAccess. */
+export function requireParam(value: string | undefined, name: string): string {
+  if (!value) throw ApiError.badRequest(`Falta el parametro de ruta "${name}"`);
+  return value;
+}
+
 export function parseIntOr(
   value: unknown,
   fallback: number,

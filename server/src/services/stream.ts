@@ -93,7 +93,7 @@ function assertRemoteUrl(videoUrl: string): URL {
 }
 
 function localStream(movie: Movie, rangeHeader: string | undefined, head: boolean): StreamTarget {
-  const filePath = resolveLocalFile(movie.video_url);
+  const filePath = resolveLocalFile(movie.videoUrl);
   const { size } = fs.statSync(filePath);
   const contentType = mimeFor(filePath);
 
@@ -131,7 +131,7 @@ async function remoteStream(
   rangeHeader: string | undefined,
   head: boolean,
 ): Promise<StreamTarget> {
-  const url = assertRemoteUrl(movie.video_url);
+  const url = assertRemoteUrl(movie.videoUrl);
 
   const upstream = await fetch(url, {
     method: head ? 'HEAD' : 'GET',
@@ -172,7 +172,7 @@ export async function openStream(
   rangeHeader: string | undefined,
   head = false,
 ): Promise<StreamTarget> {
-  return movie.video_source === 'local'
+  return movie.videoSource === 'local'
     ? localStream(movie, rangeHeader, head)
     : remoteStream(movie, rangeHeader, head);
 }

@@ -1,0 +1,157 @@
+@import 'tailwindcss';
+
+/*
+ * Paleta de Pelipop
+ *   #162530  fondo principal (ink-900)
+ *   #27404f  superficies y bordes (ink-700)
+ *   #02adca  color primario (brand-500)
+ *   #00cac3  color de acento (mint-500)
+ */
+@theme {
+  --color-ink-950: #0b161d;
+  --color-ink-900: #162530;
+  --color-ink-800: #1e3241;
+  --color-ink-700: #27404f;
+  --color-ink-600: #345261;
+  --color-ink-500: #47697a;
+
+  --color-brand-50: #e8fbff;
+  --color-brand-100: #c9f5fd;
+  --color-brand-300: #63e0ef;
+  --color-brand-400: #2fd0e4;
+  --color-brand-500: #02adca;
+  --color-brand-600: #028ca3;
+  --color-brand-700: #026e80;
+
+  --color-mint-200: #a5f0ed;
+  --color-mint-300: #66e0dc;
+  --color-mint-400: #33d5d0;
+  --color-mint-500: #00cac3;
+  --color-mint-600: #00a29c;
+
+  --color-cloud-100: #eef7fa;
+  --color-cloud-200: #d7e7ee;
+  --color-cloud-300: #b3cbd6;
+  --color-cloud-400: #8aa8b6;
+
+  --font-display: 'Outfit', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Outfit', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  --radius-card: 0.875rem;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-ink-900 font-sans text-cloud-100 antialiased;
+  }
+
+  ::selection {
+    @apply bg-brand-500 text-ink-950;
+  }
+
+  /* Barra de scroll acorde al tema */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-ink-950);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-ink-600);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-brand-600);
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-400;
+  }
+}
+
+@layer components {
+  /* Base compartida: se agrupan selectores para no hacer @apply de clases propias
+     (Tailwind v4 solo permite @apply con utilidades reales). */
+  .btn,
+  .btn-primary,
+  .btn-accent,
+  .btn-ghost,
+  .btn-danger {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply bg-brand-500 text-ink-950 hover:bg-brand-400;
+  }
+
+  .btn-accent {
+    @apply bg-mint-500 text-ink-950 hover:bg-mint-400;
+  }
+
+  .btn-ghost {
+    @apply border border-ink-600 bg-ink-800/40 text-cloud-200 hover:border-brand-500 hover:text-brand-300;
+  }
+
+  .btn-danger {
+    @apply border border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .badge,
+  .badge-brand,
+  .badge-mint {
+    @apply inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold;
+  }
+
+  .badge {
+    @apply border-ink-600 bg-ink-900/70 text-cloud-300;
+  }
+
+  .badge-brand {
+    @apply border-brand-500/40 bg-brand-500/10 text-brand-300;
+  }
+
+  .badge-mint {
+    @apply border-mint-500/40 bg-mint-500/10 text-mint-300;
+  }
+
+  .label {
+    @apply mb-1.5 block text-xs font-semibold tracking-wide text-cloud-400 uppercase;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-ink-600 bg-ink-950/70 px-3 py-2 text-sm text-cloud-100 transition placeholder:text-cloud-400/50 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25 focus:outline-none;
+  }
+
+  .card {
+    @apply rounded-card border border-ink-700 bg-ink-800/50;
+  }
+
+  .link {
+    @apply text-brand-300 underline-offset-4 transition hover:text-brand-100 hover:underline;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

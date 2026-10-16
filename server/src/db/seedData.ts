@@ -1,10 +1,49 @@
 /**
  * Catalogo de demostracion.
- * Los clips de video son muestras publicas del repositorio de Google
- * (Blender Foundation, licencia Creative Commons) usadas como contenido
- * de relleno: sustituye `videoKey` por tus propias fuentes o archivos locales.
+ * Los videos son clips de relleno de dominio publico (Blender Foundation y
+ * W3C/MDN) que admiten peticiones Range, asi el player puede hacer streaming
+ * real. Para produccion basta con cambiar `videoUrl` por tu CDN o copiar tus
+ * archivos en VIDEOS_DIR y usar `videoSource: 'local'`.
  */
-const SAMPLE_BASE = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample';
+const CLIP_SOURCES: Record<string, string> = {
+  bigbuckbunny:
+    'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4',
+  sintel: 'https://test-videos.co.uk/vids/sintel/mp4/h264/720/Sintel_720_10s_1MB.mp4',
+  jellyfish: 'https://test-videos.co.uk/vids/jellyfish/mp4/h264/720/Jellyfish_720_10s_1MB.mp4',
+  flower: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+  friday: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/friday.mp4',
+};
+
+/** Reparte los clips de relleno entre las peliculas del catalogo. */
+const CLIP_ALIASES: Record<string, keyof typeof CLIP_SOURCES> = {
+  BigBuckBunny: 'bigbuckbunny',
+  ElephantsDream: 'bigbuckbunny',
+  WhatCarCanYouGetForAGrand: 'bigbuckbunny',
+
+  Sintel: 'sintel',
+  TearsOfSteel: 'sintel',
+  ForBiggerMeltdowns: 'sintel',
+
+  VolkswagenGTIReview: 'jellyfish',
+  ForBiggerFun: 'jellyfish',
+
+  SubaruOutbackOnStreetAndDirt: 'flower',
+  ForBiggerEscapes: 'flower',
+
+  WeAreGoingOnBullrun: 'friday',
+  ForBiggerBlazes: 'friday',
+  ForBiggerJoyrides: 'friday',
+};
+
+export function remoteUrlFor(videoKey: string): string {
+  const direct = CLIP_SOURCES[videoKey];
+  if (direct) return direct;
+
+  const alias = CLIP_ALIASES[videoKey];
+  const url = alias ? CLIP_SOURCES[alias] : CLIP_SOURCES.bigbuckbunny;
+  if (!url) throw new Error(`No hay clip de relleno para "${videoKey}"`);
+  return url;
+}
 
 export type SeedRole = 'admin' | 'editor' | 'user';
 
@@ -457,7 +496,3 @@ export const MOVIES: SeedMovie[] = [
     videoKey: 'ForBiggerFun',
   },
 ];
-
-export function remoteUrlFor(videoKey: string): string {
-  return `${SAMPLE_BASE}/${videoKey}.mp4`;
-}
