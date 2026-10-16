@@ -6,7 +6,10 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { config } from './config.js';
 import { getDb, isEmptyCatalog } from './db/index.js';
+import { authenticate } from './middleware/auth.js';
 import { errorHandler, notFoundHandler } from './middleware/index.js';
+import { adminRouter } from './routes/admin.js';
+import { authRouter } from './routes/auth.js';
 import { facetsRouter, genresRouter } from './routes/catalog.js';
 import { moviesRouter } from './routes/movies.js';
 
@@ -33,6 +36,11 @@ export function createApp(): express.Express {
   );
   if (!config.isProduction) app.use(morgan('dev'));
 
+  app.use(express.json({ limit: '200kb' }));
+
+  // Solo lee el Bearer si existe; las rutas deciden si exigen sesion.
+  app.use('/api', authenticate);
+
   app.get('/api/health', (_req, res) => {
     const { total } = getDb().prepare('SELECT COUNT(*) AS total FROM movies').get() as {
       total: number;
@@ -46,6 +54,8 @@ export function createApp(): express.Express {
     });
   });
 
+  app.use('/api/auth', authRouter);
+  app.use('/api/admin', adminRouter);
   app.use('/api/genres', genresRouter);
   app.use('/api/facets', facetsRouter);
   app.use('/api/movies', moviesRouter);

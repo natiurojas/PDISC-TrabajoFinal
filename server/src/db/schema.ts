@@ -5,6 +5,19 @@
 export const SCHEMA_SQL = `
 PRAGMA foreign_keys = ON;
 
+CREATE TABLE IF NOT EXISTS users (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  email         TEXT    NOT NULL UNIQUE COLLATE NOCASE,
+  password_hash TEXT    NOT NULL,
+  display_name  TEXT    NOT NULL,
+  role          TEXT    NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'editor', 'user')),
+  is_active     INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+  created_at    TEXT    NOT NULL DEFAULT (datetime('now')),
+  updated_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_role ON users (role);
+
 CREATE TABLE IF NOT EXISTS genres (
   id   INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT    NOT NULL UNIQUE,

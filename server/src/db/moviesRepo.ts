@@ -1,5 +1,7 @@
 import { getDb } from './index.js';
+import { ensureGenreBySlug } from './genresRepo.js';
 import type { CatalogSort, Genre, Movie, MovieSource, Page, SortOrder } from './types.js';
+import { ApiError } from '../lib/errors.js';
 
 interface MovieRow {
   id: number;
@@ -250,4 +252,224 @@ export function listYears(): Array<{ year: number; movieCount: number }> {
         ORDER BY release_year DESC`,
     )
     .all() as Array<{ year: number; movieCount: number }>;
+}
+
+export interface MovieInput {
+  slug?: string;
+  title: string;
+  originalTitle?: string | null;
+  tagline?: string | null;
+  synopsis: string;
+  releaseDate?: string | null;
+  releaseYear?: number | null;
+  runtimeMinutes?: number | null;
+  ageRating?: string | null;
+  score: number;
+  popularity: number;
+  posterUrl?: string | null;
+  backdropUrl?: string | null;
+  videoSource: MovieSource;
+  videoUrl: string;
+  trailerUrl?: string | null;
+  featured: boolean;
+  /** Slugs de genero; los desconocidos se crean al vuelo. */
+  genres: string[];
+}
+
+function assertSlugAvailable(slug: string, ignoreId?: number): void {
+  const rows = getDb()
+    .prepare(`SELECT id FROM movies WHERE slug = ?${ignoreId ? ' AND id <> ?' : ''}`)
+    .all(...(ignoreId ? [slug, ignoreId] : [slug])) as Array<{ id: number }>;
+
+  if (rows.length > 0) {
+    throw new ApiError(409, 'slug_taken', `Ya existe una pelicula con el slug "${slug}"`);
+  }
+}
+
+function replaceMovieGenres(movieId: number, genreSlugs: string[]): void {
+  const db = getDb();
+  db.prepare('DELETE FROM movie_genres WHERE movie_id = ?').run(movieId);
+
+  const insert = db.prepare('INSERT OR IGNORE INTO movie_genres (movie_id, genre_id) VALUES (?, ?)');
+  for (const slug of new Set(genreSlugs.map((entry) => entry.trim()).filter(Boolean))) {
+    const genre = ensureGenreBySlug(slug);
+    insert.run(movieId, genre.id);
+  }
+}
+
+function yearFromDate(releaseDate: string | null | undefined): number | null {
+  if (!releaseDate) return null;
+  const year = Number.parseInt(releaseDate.slice(0, 4), 10);
+  return Number.isFinite(year) ? year : null;
+}
+
+export function createMovie(input: MovieInput): Movie {
+  const slug = input.slug ?? input.title;
+  assertSlugAvailable(slug);
+
+  const releaseYear = input.releaseYear ?? yearFromDate(input.releaseDate);
+
+  const info = getDb()
+    .prepare(
+      `INSERT INTO movies (
+         slug, title, original_title, tagline, synopsis, release_year, release_date,
+         runtime_minutes, age_rating, score, popularity, poster_url, backdrop_url,
+         video_source, video_url, trailer_url, featured
+       ) VALUES (
+         @slug, @title, @originalTitle, @tagline, @synopsis, @releaseYear, @releaseDate,
+         @runtimeMinutes, @ageRating, @score, @popularity, @posterUrl, @backdropUrl,
+         @videoSource, @videoUrl, @trailerUrl, @featured
+       )`,
+    )
+    .run({
+      slug,
+      title: input.title,
+      originalTitle: input.originalTitle ?? null,
+      tagline: input.tagline ?? null,
+      synopsis: input.synopsis,
+      releaseYear,
+      releaseDate: input.releaseDate ?? null,
+      runtimeMinutes: input.runtimeMinutes ?? null,
+      ageRating: input.ageRating ?? null,
+      score: input.score,
+      popularity: input.popularity,
+      posterUrl: input.posterUrl ?? null,
+      backdropUrl: input.backdropUrl ?? null,
+      videoSource: input.videoSource,
+      videoUrl: input.videoUrl,
+      trailerUrl: input.trailerUrl ?? null,
+      featured: input.featured ? 1 : 0,
+    });
+
+  const id = Number(info.lastInsertRowid);
+  replaceMovieGenres(id, input.genres);
+
+  const created = findMovieByIdOrSlug(id);
+  if (!created) throw new Error('No se pudo crear la pelicula');
+  return created;
+}
+
+export function updateMovie(id: number, input: MovieInput): Movie | null {
+  const existing = findMovieByIdOrSlug(id);
+  if (!existing) return null;
+
+  const slug = input.slug ?? existing.slug;
+  assertSlugAvailable(slug, id);
+
+  const releaseYear = input.releaseYear ?? yearFromDate(input.releaseDate);
+
+  getDb()
+    .prepare(
+      `UPDATE movies SET
+         slug = @slug, title = @title, original_title = @originalTitle, tagline = @tagline,
+         synopsis = @synopsis, release_year = @releaseYear, release_date = @releaseDate,
+         runtime_minutes = @runtimeMinutes, age_rating = @ageRating, score = @score,
+         popularity = @popularity, poster_url = @posterUrl, backdrop_url = @backdropUrl,
+         video_source = @videoSource, video_url = @videoUrl, trailer_url = @trailerUrl,
+         featured = @featured, updated_at = datetime('now')
+       WHERE id = @id`,
+    )
+    .run({
+      id,
+      slug,
+      title: input.title,
+      originalTitle: input.originalTitle ?? null,
+      tagline: input.tagline ?? null,
+      synopsis: input.synopsis,
+      releaseYear,
+      releaseDate: input.releaseDate ?? null,
+      runtimeMinutes: input.runtimeMinutes ?? null,
+      ageRating: input.ageRating ?? null,
+      score: input.score,
+      popularity: input.popularity,
+      posterUrl: input.posterUrl ?? null,
+      backdropUrl: input.backdropUrl ?? null,
+      videoSource: input.videoSource,
+      videoUrl: input.videoUrl,
+      trailerUrl: input.trailerUrl ?? null,
+      featured: input.featured ? 1 : 0,
+    });
+
+  replaceMovieGenres(id, input.genres);
+  return findMovieByIdOrSlug(id);
+}
+
+export function deleteMovie(id: number): boolean {
+  return getDb().prepare('DELETE FROM movies WHERE id = ?').run(id).changes > 0;
+}
+
+export interface CatalogStats {
+  movies: {
+    total: number;
+    featured: number;
+    averageScore: number;
+    totalRuntimeMinutes: number;
+  };
+  genres: { total: number; top: Array<{ name: string; slug: string; total: number }> };
+  years: { earliest: number | null; latest: number | null };
+  latest: Movie[];
+  topRated: Movie[];
+}
+
+export function catalogStats(): CatalogStats {
+  const db = getDb();
+
+  const movies = db
+    .prepare(
+      `SELECT COUNT(*) AS total,
+              COALESCE(SUM(featured), 0) AS featured,
+              COALESCE(ROUND(AVG(score), 2), 0) AS averageScore,
+              COALESCE(SUM(runtime_minutes), 0) AS totalRuntimeMinutes,
+              MIN(release_year) AS earliest,
+              MAX(release_year) AS latest
+         FROM movies`,
+    )
+    .get() as {
+    total: number;
+    featured: number;
+    averageScore: number;
+    totalRuntimeMinutes: number;
+    earliest: number | null;
+    latest: number | null;
+  };
+
+  const { total: genreTotal } = db
+    .prepare('SELECT COUNT(*) AS total FROM genres')
+    .get() as { total: number };
+
+  const topGenres = db
+    .prepare(
+      `SELECT g.name, g.slug, COUNT(mg.movie_id) AS total
+         FROM genres g
+         LEFT JOIN movie_genres mg ON mg.genre_id = g.id
+        GROUP BY g.id
+        ORDER BY total DESC, g.name ASC
+        LIMIT 6`,
+    )
+    .all() as Array<{ name: string; slug: string; total: number }>;
+
+  const latest = decorate(
+    db
+      .prepare(`SELECT ${COLUMNS} FROM movies m ORDER BY m.release_date DESC, m.id DESC LIMIT 5`)
+      .all() as MovieRow[],
+  );
+
+  const topRated = decorate(
+    db
+      .prepare(`SELECT ${COLUMNS} FROM movies m ORDER BY m.score DESC, m.popularity DESC LIMIT 5`)
+      .all() as MovieRow[],
+  );
+
+  return {
+    movies: {
+      total: movies.total,
+      featured: movies.featured,
+      averageScore: movies.averageScore,
+      totalRuntimeMinutes: movies.totalRuntimeMinutes,
+    },
+    genres: { total: genreTotal, top: topGenres },
+    years: { earliest: movies.earliest, latest: movies.latest },
+    latest,
+    topRated,
+  };
 }

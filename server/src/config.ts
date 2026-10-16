@@ -26,4 +26,11 @@ export const config = {
     .map((origin) => origin.trim())
     .filter(Boolean),
   requestTimeoutMs: int(process.env.REQUEST_TIMEOUT_MS, 20_000),
+  /**
+   * Secreto para firmar JWT. En produccion es obligatorio definirlo via
+   * JWT_SECRET; en desarrollo usamos uno local y efimero.
+   */
+  jwtSecret: process.env.JWT_SECRET ?? 'pelipop_dev_secret_no_usar_en_produccion',
+  jwtExpiresInSeconds: int(process.env.JWT_EXPIRES_IN_SECONDS, 60 * 60 * 24),
+  isDevSecret: !process.env.JWT_SECRET,
 } as const;

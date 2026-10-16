@@ -1,9 +1,19 @@
 /**
- * Catalogo de demo. Los clips de video son 샘플 públicos de Google
- * (proyecto Blender, dominio publico) sirviendo de contenido de relleno:
- * sustituye `videoFile`/`videoUrl` por tus archivos o fuentes reales.
+ * Catalogo de demostracion.
+ * Los clips de video son muestras publicas del repositorio de Google
+ * (Blender Foundation, licencia Creative Commons) usadas como contenido
+ * de relleno: sustituye `videoKey` por tus propias fuentes o archivos locales.
  */
 const SAMPLE_BASE = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample';
+
+export type SeedRole = 'admin' | 'editor' | 'user';
+
+export interface SeedUser {
+  email: string;
+  displayName: string;
+  password: string;
+  role: SeedRole;
+}
 
 export interface SeedGenre {
   name: string;
@@ -22,21 +32,21 @@ export interface SeedMovie {
   score: number;
   popularity: number;
   genres: string[];
-  /** Clave del clip publico reutilizado como fuente de video. */
   videoKey: string;
   featured?: boolean;
 }
 
 export const GENRES: SeedGenre[] = [
   { name: 'Accion', slug: 'accion' },
-  { name: 'Aventura', slug: 'aventura' },
   { name: 'Animacion', slug: 'animacion' },
+  { name: 'Aventura', slug: 'aventura' },
   { name: 'Ciencia ficcion', slug: 'ciencia-ficcion' },
   { name: 'Comedia', slug: 'comedia' },
   { name: 'Crimen', slug: 'crimen' },
   { name: 'Documental', slug: 'documental' },
   { name: 'Drama', slug: 'drama' },
   { name: 'Familiar', slug: 'familiar' },
+  { name: 'Fantasia', slug: 'fantasia' },
   { name: 'Musical', slug: 'musical' },
   { name: 'Misterio', slug: 'misterio' },
   { name: 'Romance', slug: 'romance' },
@@ -44,14 +54,35 @@ export const GENRES: SeedGenre[] = [
   { name: 'Thriller', slug: 'thriller' },
 ];
 
+export const USERS: SeedUser[] = [
+  {
+    email: 'admin@pelipop.dev',
+    displayName: 'Administracion',
+    password: 'admin12345',
+    role: 'admin',
+  },
+  {
+    email: 'editor@pelipop.dev',
+    displayName: 'Equipo de catalogo',
+    password: 'editor12345',
+    role: 'editor',
+  },
+  {
+    email: 'cliente@pelipop.dev',
+    displayName: 'Cliente demo',
+    password: 'cliente12345',
+    role: 'user',
+  },
+];
+
 export const MOVIES: SeedMovie[] = [
   {
     slug: 'la-ultima-senal',
     title: 'La ultima senal',
     originalTitle: 'The Last Signal',
-    tagline: 'Cuando la radio calla, alguien sigue escuchando.',
+    tagline: 'Cuando la radio se calla, alguien sigue escuchando.',
     synopsis:
-      'Una ingeniera de telecomunicaciones descubre una emissions imposible en una frecuencia prohibida. La senal organise a un grupo de insomnes que lleva veinte anos buscando a su emisor, y cada noche les devuelve un minuto del mismo dia.',
+      'Una ingeniera de telecomunicaciones detecta una emision imposible en una frecuencia prohibida. La senal reune cada noche a un grupo de insomnes que lleva veinte anos buscando a su emisor, y a cambio les devuelve un minuto del mismo dia que no logran recordar.',
     releaseDate: '2024-11-08',
     runtimeMinutes: 118,
     ageRating: '16',
@@ -65,9 +96,9 @@ export const MOVIES: SeedMovie[] = [
     slug: 'ciudad-de-cristal',
     title: 'Ciudad de cristal',
     originalTitle: 'Glass City',
-    tagline: 'La ciudad perfecta hides its cracks.',
+    tagline: 'La ciudad perfecta tambien tiene grietas.',
     synopsis:
-      'En una metropoles construida sobre una secrets taboo, un arquitecto descubre que su propia memoria ha sido archivada por la ciudad. Para recuperarla tendra que derrumbarla habitacion a habitacion.',
+      'En una metropoles construida sobre un secreto compartido, un arquitecto descubre que la propia ciudad archiva los recuerdos de sus habitantes. Para volver a los suyos tendra que desmontarla habitacion por habitacion.',
     releaseDate: '2023-05-19',
     runtimeMinutes: 134,
     ageRating: '12',
@@ -75,15 +106,14 @@ export const MOVIES: SeedMovie[] = [
     popularity: 91,
     genres: ['ciencia-ficcion', 'drama'],
     videoKey: 'Sintel',
-    featured: true,
   },
   {
-    slug: 'el-conductor',
-    title: 'El conductor',
+    slug: 'el-director-de-orquesta',
+    title: 'El director de orquesta',
     originalTitle: 'The Conductor',
     tagline: 'La musica es el unico mapa que queda.',
     synopsis:
-      'Un sinfonico pierde la memoria en medio de un gira y empieza a reconocer cada calle por el eco de los edificios. Su obsesion por reconstruir el concierto le revela el secreto que su Tonsuraudio llevaba silenciando.',
+      'Un director de orquesta pierde la memoria en mitad de una gira y empieza a reconocer cada ciudad por el eco de sus edificios. Reconstruir el concierto que nunca llego a estrenar le revela el secreto que su propia orquesta llevaba silenciando.',
     releaseDate: '2022-03-04',
     runtimeMinutes: 121,
     ageRating: '12',
@@ -93,12 +123,12 @@ export const MOVIES: SeedMovie[] = [
     videoKey: 'ElephantsDream',
   },
   {
-    slug: 'neon-valle',
-    title: 'Neon Valle',
+    slug: 'valle-neon',
+    title: 'Valle neon',
     originalTitle: 'Neon Valley',
-    tagline: 'Todos los secretos tienen un turno de noche.',
+    tagline: 'Todos los secretos tienen turno de noche.',
     synopsis:
-      'Dos irmãos heredan una gasolinera en un valle que no aparece en ningun mapa. Cada madrugada, clientes de otros tiempos pagan con monedas que no existen y piden cosas que no deberian ser posibles.',
+      'Dos hermanos heredan una gasolinera en un valle que no aparece en ningun mapa. Cada madrugada aparecen clientes de otros tiempos que pagan con monedas inexistentes y piden cosas que no deberian ser posibles.',
     releaseDate: '2024-02-23',
     runtimeMinutes: 107,
     ageRating: '16',
@@ -114,7 +144,7 @@ export const MOVIES: SeedMovie[] = [
     originalTitle: 'Echo Room',
     tagline: 'Todo lo que se dice aqui vuelve con otro nombre.',
     synopsis:
-      'Unaadog trainer de peliculas encuentra un almacen lleno de cintas que graban conversaciones que aun no han ocurrido. AlProjectionlas, descubre que el montaje lleva su propia voz desde hace veinticinco años.',
+      'Una montadora de peliculas encuentra un almacen lleno de cintas que graban conversaciones que aun no han ocurrido. Al reproducirlas descubre que la ultima cinta lleva veinticinco anos de voz propia.',
     releaseDate: '2021-09-30',
     runtimeMinutes: 99,
     ageRating: '12',
@@ -129,13 +159,13 @@ export const MOVIES: SeedMovie[] = [
     originalTitle: 'Ice Carnival',
     tagline: 'La fiesta dura una noche. La deuda, no.',
     synopsis:
-      'Un grupo de amigos gana una mascara en un carnaval de invierno y descubre que cada vez que uno la usa, pierde un recuerdo. Lo que empiezan a olvidar les cuesta mucho mas que el premio.',
+      'Un grupo de amigos gana una mascara en un carnaval de invierno y descubre que cada vez que alguien se la pone, pierde un recuerdo. Lo que empiezan a olvidar les cuesta mucho mas que el premio.',
     releaseDate: '2023-12-15',
     runtimeMinutes: 104,
     ageRating: '12',
     score: 7.8,
     popularity: 87,
-    genres: ['comedia', 'fantasia' as string, 'familiar'],
+    genres: ['comedia', 'fantasia', 'familiar'],
     videoKey: 'ForBiggerFun',
   },
   {
@@ -144,7 +174,7 @@ export const MOVIES: SeedMovie[] = [
     originalTitle: 'Last Ride',
     tagline: 'Ciento veinte kilometros hasta el amanecer.',
     synopsis:
-      'Un repartidor acepta el encargo de llevar un paquete sin destino a traves del pais. El camino mas corto lo lleva por personas que llevan veinte años esperando ese mismo paquete.',
+      'Un repartidor acepta llevar un paquete sin destino a traves del pais. El camino mas corto lo lleva delante de personas que llevan veinte anos esperando exactamente ese envio.',
     releaseDate: '2022-11-11',
     runtimeMinutes: 112,
     ageRating: '16',
@@ -157,9 +187,9 @@ export const MOVIES: SeedMovie[] = [
     slug: 'rutas-de-fuego',
     title: 'Rutas de fuego',
     originalTitle: 'Burnt Routes',
-    tagline: 'El corollary nunca se queda en el mapa.',
+    tagline: 'La carretera nunca se queda en el mapa.',
     synopsis:
-      'Un equipo de rescate de montaña encuentra un bus que no deberia existir en un paso cerrado por la nieve. A bordo, once personas que desaparecieron en exitos distintos relocation.',
+      'Un equipo de rescate de montana encuentra un autobus que no deberia existir en un paso cerrado por la nieve. A bordo, once personas que desaparecieron en fechas distintas, todas a la misma hora.',
     releaseDate: '2024-01-26',
     runtimeMinutes: 126,
     ageRating: '12',
@@ -172,9 +202,9 @@ export const MOVIES: SeedMovie[] = [
     slug: 'el-pais-de-arriba',
     title: 'El pais de arriba',
     originalTitle: 'Upcountry',
-    tagline: 'Todo crece aqui. Incluido lo que no devait.',
+    tagline: 'Todo crece aqui. Tambien lo que no deberia.',
     synopsis:
-      'Una agronoma vuelve al pueblo que la vio crecer y descubre que su padre lleva thirty años cultivando un proyecto que Modifica el clima de la comarca.',
+      'Una agronoma vuelve al pueblo que la vio crecer y descubre que su padre lleva treinta anos cultivando un proyecto que altera el clima de la comarca entera.',
     releaseDate: '2021-04-09',
     runtimeMinutes: 96,
     ageRating: 'TP',
@@ -189,7 +219,7 @@ export const MOVIES: SeedMovie[] = [
     originalTitle: 'Zero Orbit',
     tagline: 'A mil kilometros de casa, nadie te espera.',
     synopsis:
-      'La primera mision tripulada a un planeta sin nombre sale mal en el ultimo segundo. Cuando la nave vuelve a entrar en orbita, su tripulacion ya no recuerda haber salido.',
+      'La primera mision tripulada hacia un planeta sin nombre falla en el ultimo segundo. Cuando la nave vuelve a entrar en orbita, su tripulacion ya no recuerda haber salido.',
     releaseDate: '2023-08-22',
     runtimeMinutes: 129,
     ageRating: '12',
@@ -200,12 +230,12 @@ export const MOVIES: SeedMovie[] = [
     featured: true,
   },
   {
-    slug: 'casa-cerca',
-    title: 'Casa cerca',
+    slug: 'la-casa-de-al-lado',
+    title: 'La casa de al lado',
     originalTitle: 'Next Door',
     tagline: 'Tu vecino sabe demasiado y no tiene prisa.',
     synopsis:
-      'Una pareja se muda a la casa de sus sueños y descubre que el vecino de al lado lleva una我吗 identificacion igual a la suya, con la misma foto y tres años mas de edad.',
+      'Una pareja se muda a la casa de sus suenos y descubre que el vecino de al lado guarda una identificacion identica a la suya, con la misma fotografia y tres anos mas.',
     releaseDate: '2022-06-17',
     runtimeMinutes: 101,
     ageRating: '16',
@@ -218,9 +248,9 @@ export const MOVIES: SeedMovie[] = [
     slug: 'el-sombrero-azul',
     title: 'El sombrero azul',
     originalTitle: 'The Blue Hat',
-    tagline: 'Hay Maggie quien solo se recuerda con musica.',
+    tagline: 'Hay personas que solo se recuerdan con musica.',
     synopsis:
-      'Un músico de NPR pierde la memoria cada vez que toca. Su sobrina, que tambien toca, decide aprender a recordar por los dos antes de que el archivo familiar desaparezca.',
+      'Un musico callejero pierde la memoria cada vez que toca. Su sobrina, que tambien toca, decide aprender a recordar por los dos antes de que el archivo familiar desaparezca del todo.',
     releaseDate: '2024-08-02',
     runtimeMinutes: 94,
     ageRating: 'TP',
@@ -230,18 +260,18 @@ export const MOVIES: SeedMovie[] = [
     videoKey: 'BigBuckBunny',
   },
   {
-    slug: 'centro comercial-fin-de-semana',
+    slug: 'centro-comercial-fin-de-semana',
     title: 'Centro comercial, fin de semana',
     originalTitle: 'Weekend Mall',
-    tagline: 'Cuarenta y ocho horas con descuento unlimited.',
+    tagline: 'Cuarenta y ocho horas con descuento infinito.',
     synopsis:
-      'Dos amigos sobreviven al turno nocturno de un centro comercial abandonado y descubren que cada tienda es un puerto a un pais distinto.',
+      'Dos amigos sobreviven al turno nocturno de un centro comercial recien cerrado y descubren que cada tienda es la puerta a un pais distinto.',
     releaseDate: '2021-11-19',
     runtimeMinutes: 88,
     ageRating: 'TP',
     score: 6.6,
     popularity: 71,
-    genres: ['comedia', 'fantasia' as string, 'aventura'],
+    genres: ['comedia', 'fantasia', 'aventura'],
     videoKey: 'WhatCarCanYouGetForAGrand',
   },
   {
@@ -250,7 +280,7 @@ export const MOVIES: SeedMovie[] = [
     originalTitle: 'Protected Witness',
     tagline: 'Lo que viste no cabe en un juicio.',
     synopsis:
-      'Un testigo protegido descubre que su nueva identidad tiene un error de fabrication de dos meses. El margen de error lo tiene una organisation que tambien lo sabe.',
+      'Un testigo protegido descubre que su nueva identidad tiene un error de fabricacion de dos meses. Ese margen de error lo conoce una organizacion que tambien esta buscandolo.',
     releaseDate: '2023-02-14',
     runtimeMinutes: 117,
     ageRating: '18',
@@ -265,23 +295,23 @@ export const MOVIES: SeedMovie[] = [
     originalTitle: 'The Last Movie',
     tagline: 'Cuando se apagan las luces, queda el cine.',
     synopsis:
-      'El ultimo proyeccionista de un cine que cierra en demolition discovers que la ultima pelicula que proyectara es una Grabacion de su propia vida, aun no vivida.',
+      'El ultimo proyeccionista de un cine amenazado de derribo descubre que la funcion de cierre sera la grabacion de su propia vida, todavia no vivida.',
     releaseDate: '2024-10-31',
     runtimeMinutes: 109,
     ageRating: '16',
     score: 8.6,
     popularity: 94,
-    genres: ['drama', 'misterio', 'fantasia' as string],
+    genres: ['drama', 'misterio', 'fantasia'],
     videoKey: 'ElephantsDream',
     featured: true,
   },
   {
-    slug: 'la-venta-del-century',
-    title: 'La venta del century',
+    slug: 'la-venta-del-siglo',
+    title: 'La venta del siglo',
     originalTitle: 'Century Sale',
     tagline: 'Todo tiene precio. Excepto tu nombre.',
     synopsis:
-      'Una subasta de objetos que fueron propiedad de gente famosa termina mal cuando aparece un lote que pertenece a un comprador futuro. Quien lo gana, hereda una deuda de noventa años.',
+      'Una subasta de objetos que fueron propiedad de gente famosa se tuerce cuando aparece un lote cuyo comprador es una persona que aun no ha nacido. Quien lo gane hereda una deuda de noventa anos.',
     releaseDate: '2022-05-20',
     runtimeMinutes: 102,
     ageRating: '12',
@@ -296,7 +326,7 @@ export const MOVIES: SeedMovie[] = [
     originalTitle: 'Winter in Eden',
     tagline: 'La nieve cubre lo que nadie recuerda.',
     synopsis:
-      'Un pueblo de montaña aparece Covered de nieve en pleno verano. SusCERTIFYPAYaxe únicos窓口 uno a uno y la arqueologa que llega a(documentar)lo descubre demasiado tarde.',
+      'Un pueblo de montania aparece cubierto de nieve en pleno verano. Sus habitantes desaparecen uno a uno y la arqueologa enviada a documentarlo se da cuenta demasiado tarde.',
     releaseDate: '2021-01-28',
     runtimeMinutes: 105,
     ageRating: 'TP',
@@ -306,12 +336,12 @@ export const MOVIES: SeedMovie[] = [
     videoKey: 'TearsOfSteel',
   },
   {
-    slug: 'ruleta-rusa',
-    title: 'Ruleta rusa',
-    originalTitle: 'Russian Roulette',
+    slug: 'la-verdad-una-vez',
+    title: 'La verdad, una vez',
+    originalTitle: 'One Truth',
     tagline: 'El juego empieza cuando alguien se niega.',
     synopsis:
-      'Un grupo de amigos ijuegan cada noche a un juego de mesa donde la apuesta es una verdad. Una noche, la verdad que se decide callar cambia el juego para siempre.',
+      'Cuatro amigos juegan cada noche a un juego de mesa cuya unica apuesta es una verdad. Una noche, la verdad que deciden callar cambia el juego para siempre.',
     releaseDate: '2023-09-01',
     runtimeMinutes: 98,
     ageRating: '18',
@@ -324,9 +354,9 @@ export const MOVIES: SeedMovie[] = [
     slug: 'atlas-de-polvo',
     title: 'Atlas de polvo',
     originalTitle: 'Dust Atlas',
-    tagline: 'Todo lo que desaparece, acaba en un mapa.',
+    tagline: 'Todo lo que desaparece acaba en un mapa.',
     synopsis:
-      'Un cartógrafo Municipal empieza a dibujar los edificios que la ciudad demuele y descubre que sus planos describen un futuro que nadie quiere habitar.',
+      'Un cartografo municipal empieza a dibujar los edificios que la ciudad derriba y descubre que sus planos describen un futuro que nadie quiere habitar.',
     releaseDate: '2024-03-15',
     runtimeMinutes: 113,
     ageRating: '12',
@@ -339,9 +369,9 @@ export const MOVIES: SeedMovie[] = [
     slug: 'la-cocina-de-los-fuegos',
     title: 'La cocina de los fuegos',
     originalTitle: 'Kitchen of Fires',
-    tagline: 'Todo se cocina a fuego lento. Tambien las与众.',
+    tagline: 'Todo se cocina a fuego lento. Tambien los rencores.',
     synopsis:
-      'Una chef pierde el gusto y vuelve a su pueblo para开放的 cocina familiar, donde descubre que la Secret sauce que.End conserva un error que lleva geraçõesMaintaining.',
+      'Una chef pierde el gusto y vuelve a su pueblo para reabrir la cocina familiar, donde descubre que la salsa secreta de la casa oculta un error que se arrastra desde hace generaciones.',
     releaseDate: '2022-09-09',
     runtimeMinutes: 111,
     ageRating: '12',
@@ -351,12 +381,12 @@ export const MOVIES: SeedMovie[] = [
     videoKey: 'BigBuckBunny',
   },
   {
-    slug: 'bitcoin-family',
-    title: 'FamiliaBits',
+    slug: 'familia-bits',
+    title: 'Familia Bits',
     originalTitle: 'Bits Family',
     tagline: 'El dinero ya no existe. Solo el tiempo.',
     synopsis:
-      'Una familia entera acumula BTC durante años y descubre que ha estado regalando su patrimonio al vecino de al lado, byte a byte, durante dos décadas.',
+      'Una familia junta criptomonedas durante veinte anos y descubre que buena parte de su patrimonio se ha ido desvaneciendo, byte a byte, por una cuenta que nadie recuerda abrir.',
     releaseDate: '2021-06-11',
     runtimeMinutes: 91,
     ageRating: 'TP',
@@ -369,15 +399,15 @@ export const MOVIES: SeedMovie[] = [
     slug: 'la-frontera-invisible',
     title: 'La frontera invisible',
     originalTitle: 'Invisible Border',
-    tagline: 'Las周一 líneas que nadie negocia.',
+    tagline: 'Hay lineas que nadie negocia.',
     synopsis:
-      'Una画出 mapas que cambia cuando cierras los ojos descubre una frontera que separa dos versiones del mismo barrio, y un niMAO que vive en el medio.',
+      'Una cartografa de oficio dibuja mapas que cambian cuando cierra los ojos. Al fijarse en el detalle, encuentra una frontera que separa dos versiones del mismo barrio y un nino que vive en el medio.',
     releaseDate: '2023-04-05',
     runtimeMinutes: 122,
     ageRating: '16',
     score: 8.3,
     popularity: 89,
-    genres: ['ciencia-ficcion', 'drama', 'fantasia' as string],
+    genres: ['ciencia-ficcion', 'drama', 'fantasia'],
     videoKey: 'VolkswagenGTIReview',
     featured: true,
   },
@@ -387,7 +417,7 @@ export const MOVIES: SeedMovie[] = [
     originalTitle: 'Sunday Without Glasses',
     tagline: 'Cuando dejas de ver bien, empiezas a ver de verdad.',
     synopsis:
-      'Un restaurador de Spike just cuando ya no distingue los detalles se ve obligado a reconstruir cada plato desde los recuerdos de sus clientes.',
+      'Un restaurador de pintura pierde la vista justo cuando mas le importan los detalles. Tendra que reconstruir cada obra desde lo que sus clientes le cuentan.',
     releaseDate: '2024-05-30',
     runtimeMinutes: 86,
     ageRating: 'TP',
@@ -395,6 +425,36 @@ export const MOVIES: SeedMovie[] = [
     popularity: 69,
     genres: ['drama', 'romance'],
     videoKey: 'WhatCarCanYouGetForAGrand',
+  },
+  {
+    slug: 'la-cabana-roja',
+    title: 'La cabana roja',
+    originalTitle: 'The Red Cottage',
+    tagline: 'Toda familia tiene una habitacion que no se abre.',
+    synopsis:
+      'Una familia se instala en una casa heredada y encuentra la puerta de una habitacion clavada. Lo que hay detras es el mismo suceso visto cinco veces desde cinco puntos de vista distintos.',
+    releaseDate: '2022-02-11',
+    runtimeMinutes: 114,
+    ageRating: '16',
+    score: 7.8,
+    popularity: 75,
+    genres: ['terror', 'misterio', 'drama'],
+    videoKey: 'ForBiggerEscapes',
+  },
+  {
+    slug: 'manual-de-escape',
+    title: 'Manual de escape',
+    originalTitle: 'Escape Manual',
+    tagline: 'Nadie te enseña a salir. Solo a quedarte.',
+    synopsis:
+      'Un profesor de supervivencia urbana imparte un curso para salir de cualquier sitio. Cuando alguien lo usa para no volver a su casa, descubre que el problema no era la habitacion.',
+    releaseDate: '2024-04-19',
+    runtimeMinutes: 103,
+    ageRating: '12',
+    score: 7.2,
+    popularity: 73,
+    genres: ['thriller', 'drama', 'misterio'],
+    videoKey: 'ForBiggerFun',
   },
 ];
 
