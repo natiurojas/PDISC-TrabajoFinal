@@ -1,12 +1,17 @@
 import type {
   AdminStats,
   CatalogQuery,
+  CheckoutPayload,
+  CheckoutResult,
   Facets,
   Movie,
+  MovieAccess,
   MoviePayload,
   Page,
+  Purchase,
   Role,
   Session,
+  TestCard,
   User,
 } from '../types';
 
@@ -187,7 +192,6 @@ export const api = {
 
   admin: {
     stats: (signal?: AbortSignal) => request<AdminStats>('/admin/stats', { signal }),
-
     createMovie: (payload: MoviePayload) =>
       request<Movie>('/admin/movies', { method: 'POST', body: payload }),
     updateMovie: (idOrSlug: string | number, payload: MoviePayload) =>
@@ -225,6 +229,17 @@ export const api = {
       ) => request<User>(`/admin/users/${id}`, { method: 'PATCH', body: payload }),
       remove: (id: number) => request<{ ok: boolean }>(`/admin/users/${id}`, { method: 'DELETE' }),
     },
+  },
+
+  payments: {
+    access: (idOrSlug: string | number, signal?: AbortSignal) =>
+      request<MovieAccess>(`/payments/access/${encodeURIComponent(String(idOrSlug))}`, { signal }),
+    checkout: (payload: CheckoutPayload) =>
+      request<CheckoutResult>('/payments/checkout', { method: 'POST', body: payload }),
+    mine: (signal?: AbortSignal) =>
+      request<{ items: Purchase[] }>('/payments/mine', { signal }),
+    testCards: (signal?: AbortSignal) =>
+      request<{ items: TestCard[] }>('/payments/test-cards', { skipAuth: true, signal }),
   },
 };
 

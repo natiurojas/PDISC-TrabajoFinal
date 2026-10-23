@@ -14,7 +14,8 @@ import {
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
-export function VideoPlayer({ movie }: { movie: Movie }) {
+export function VideoPlayer({ movie, src }: { movie: Movie; src?: string | null }) {
+  const source = src ?? movie.streamUrl;
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hideTimer = useRef<number | undefined>(undefined);
@@ -178,7 +179,7 @@ export function VideoPlayer({ movie }: { movie: Movie }) {
     >
       <video
         ref={videoRef}
-        src={movie.streamUrl}
+        src={source}
         poster={movie.backdropUrl ?? undefined}
         preload="metadata"
         playsInline

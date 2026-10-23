@@ -30,6 +30,21 @@ export function formatNumber(value: number): string {
   return new Intl.NumberFormat('es-ES').format(value);
 }
 
+/** Centimos -> "3,99 €" (o la moneda indicada). */
+export function formatMoney(cents: number, currency = 'EUR'): string {
+  return new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+  }).format(cents / 100);
+}
+
+/** Fecha de caducidad legible para alquileres ("hasta el 12 de julio, 18:30"). */
+export function formatExpiry(value: string | null): string {
+  if (!value) return '';
+  return formatDateTime(value);
+}
+
 export function formatDateTime(value: string): string {
   const iso = value.includes('T') ? value : value.replace(' ', 'T') + 'Z';
   const date = new Date(iso);

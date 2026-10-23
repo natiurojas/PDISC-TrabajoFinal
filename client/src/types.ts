@@ -87,6 +87,7 @@ export interface AdminStats {
   genres: { total: number; top: Array<{ name: string; slug: string; total: number }> };
   years: { earliest: number | null; latest: number | null };
   users: { total: number; byRole: Array<{ role: Role; total: number }> };
+  payments: PaymentStats;
   latest: Movie[];
   topRated: Movie[];
 }
@@ -119,6 +120,88 @@ export interface MoviePayload {
   videoSource: MovieSource;
   videoUrl: string;
   trailerUrl?: string;
+  rentPriceCents?: number;
+  buyPriceCents?: number;
   featured: boolean;
   genres: string[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Pagos simulados                                                     */
+/* ------------------------------------------------------------------ */
+
+export type PurchaseKind = 'rent' | 'buy';
+export type PurchaseStatus = 'paid' | 'failed';
+export type PaymentMethod = 'card' | 'paypal';
+export type EntitlementSource = 'purchase' | 'staff' | 'free';
+
+export interface PurchaseMovie {
+  id: number;
+  slug: string;
+  title: string;
+  posterUrl: string | null;
+}
+
+export interface Purchase {
+  id: number;
+  reference: string;
+  kind: PurchaseKind;
+  status: PurchaseStatus;
+  amountCents: number;
+  currency: string;
+  method: PaymentMethod;
+  cardLast4: string | null;
+  failureReason: string | null;
+  expiresAt: string | null;
+  paidAt: string | null;
+  createdAt: string;
+  movie: PurchaseMovie;
+}
+
+export interface PaymentStats {
+  revenueCents: number;
+  paidCount: number;
+  rentCount: number;
+  buyCount: number;
+  failedCount: number;
+  recent: Purchase[];
+}
+
+export interface MovieAccess {
+  movie: { id: number; slug: string; title: string };
+  free: boolean;
+  prices: { rentCents: number; buyCents: number; currency: string };
+  entitlement: {
+    owned: boolean;
+    kind: PurchaseKind | null;
+    expiresAt: string | null;
+    source: EntitlementSource | null;
+  };
+  streamUrl: string | null;
+  playbackTtlSeconds: number;
+}
+
+export interface CheckoutPayload {
+  idOrSlug: string;
+  kind: PurchaseKind;
+  method: PaymentMethod;
+  cardNumber?: string;
+  cardName?: string;
+  cardExpiry?: string;
+  cardCvv?: string;
+  paypalEmail?: string;
+}
+
+export interface CheckoutResult {
+  ok: boolean;
+  purchase: Purchase;
+  streamUrl: string | null;
+  message: string;
+}
+
+export interface TestCard {
+  number: string;
+  brand: string;
+  outcome: 'paid' | 'failed';
+  label: string;
 }

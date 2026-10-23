@@ -246,3 +246,39 @@ export const RefreshIcon = (props: IconProps) => (
     <path d="M20 4.5V10h-5.5" />
   </Base>
 );
+
+export const CreditCardIcon = (props: IconProps) => (
+  <Base {...props}>
+    <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
+    <path d="M2.5 9.5h19M6 14.5h4" />
+  </Base>
+);
+
+export const WalletIcon = (props: IconProps) => (
+  <Base {...props}>
+    <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3" />
+    <rect x="3.5" y="7.5" width="17" height="12" rx="2.5" />
+    <path d="M16 13.5h1.5" />
+  </Base>
+);
+
+export const ShoppingBagIcon = (props: IconProps) => (
+  <Base {...props}>
+    <path d="M5.5 8h13l-1 12h-11z" />
+    <path d="M9 8V6.5a3 3 0 0 1 6 0V8" />
+  </Base>
+);
+
+export const ReceiptIcon = (props: IconProps) => (
+  <Base {...props}>
+    <path d="M6 3.5h12v17l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4z" />
+    <path d="M9 8h6M9 12h6M9 16h3" />
+  </Base>
+);
+
+export const TicketIcon = (props: IconProps) => (
+  <Base {...props}>
+    <path d="M3.5 8.5A2 2 0 0 1 5.5 6.5h13a2 2 0 0 1 2 2v1a2.5 2.5 0 0 0 0 5v1a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2v-1a2.5 2.5 0 0 0 0-5z" />
+    <path d="M14 7v10" strokeDasharray="2 2" />
+  </Base>
+);
