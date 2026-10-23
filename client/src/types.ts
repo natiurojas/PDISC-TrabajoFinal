@@ -39,6 +39,8 @@ export interface Movie {
   videoUrl: string;
   streamUrl: string;
   trailerUrl: string | null;
+  rentPriceCents: number;
+  buyPriceCents: number;
   featured: boolean;
   genres: Genre[];
 }
