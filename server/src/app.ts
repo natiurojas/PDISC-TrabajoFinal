@@ -12,6 +12,7 @@ import { adminRouter } from './routes/admin.js';
 import { authRouter } from './routes/auth.js';
 import { facetsRouter, genresRouter } from './routes/catalog.js';
 import { moviesRouter } from './routes/movies.js';
+import { paymentsRouter } from './routes/payments.js';
 
 const CLIENT_DIST = path.join(config.rootDir, 'client', 'dist');
 
@@ -59,6 +60,7 @@ export function createApp(): express.Express {
   app.use('/api/genres', genresRouter);
   app.use('/api/facets', facetsRouter);
   app.use('/api/movies', moviesRouter);
+  app.use('/api/payments', paymentsRouter);
 
   // En produccion el mismo proceso sirve el build del frontend.
   if (config.isProduction && fs.existsSync(CLIENT_DIST)) {

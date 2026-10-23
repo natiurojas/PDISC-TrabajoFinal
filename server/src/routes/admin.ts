@@ -8,6 +8,7 @@ import {
   findMovieByIdOrSlug,
   updateMovie,
 } from '../db/moviesRepo.js';
+import { paymentStats } from '../db/purchasesRepo.js';
 import {
   countUsersByRole,
   createUser,
@@ -74,6 +75,7 @@ adminRouter.get(
         total: totalUsers,
         byRole: byRole.map((entry) => ({ role: entry.role, total: entry.total })),
       },
+      payments: paymentStats(),
     });
   }),
 );

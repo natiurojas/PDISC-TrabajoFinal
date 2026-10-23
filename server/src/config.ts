@@ -33,4 +33,8 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET ?? 'pelipop_dev_secret_no_usar_en_produccion',
   jwtExpiresInSeconds: int(process.env.JWT_EXPIRES_IN_SECONDS, 60 * 60 * 24),
   isDevSecret: !process.env.JWT_SECRET,
+  /** Moneda de la tienda (codigo ISO 4217). */
+  currency: (process.env.CURRENCY ?? 'EUR').toUpperCase(),
+  /** Horas que dura un alquiler simulado. */
+  rentDurationHours: int(process.env.RENT_DURATION_HOURS, 48),
 } as const;

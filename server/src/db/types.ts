@@ -33,6 +33,9 @@ export interface Movie {
   /** URL del backend lista para <video src>. Nunca se expone la ruta local del disco. */
   streamUrl: string;
   trailerUrl: string | null;
+  /** Precios en centimos para el modulo de pago simulado. */
+  rentPriceCents: number;
+  buyPriceCents: number;
   featured: boolean;
   genres: Genre[];
 }

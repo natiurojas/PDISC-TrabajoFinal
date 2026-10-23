@@ -2,9 +2,10 @@ import { config } from '../config.js';
 import { closeDb, getDb } from './index.js';
 import { findOrCreateGenre } from './genresRepo.js';
 import { createMovie } from './moviesRepo.js';
+import { countPurchases, createPurchase } from './purchasesRepo.js';
 import { GENRES, MOVIES, USERS, remoteUrlFor } from './seedData.js';
 import { TRUNCATE_SQL } from './schema.js';
-import { createUser, emailExists } from './usersRepo.js';
+import { createUser, emailExists, findUserByEmail } from './usersRepo.js';
 
 const reset = process.argv.includes('--reset');
 
@@ -85,6 +86,39 @@ async function main(): Promise<void> {
 
   const total = db.prepare('SELECT COUNT(*) AS total FROM movies').get() as { total: number };
   console.log(`[pelipop] ${created} peliculas nuevas. Total en catalogo: ${total.total}.`);
+
+  // Compras de demostracion para que el historial y el dashboard no esten vacios.
+  const cliente = findUserByEmail('cliente@pelipop.dev');
+  if (cliente && countPurchases() === 0) {
+    const rows = db
+      .prepare('SELECT id, rent_price_cents, buy_price_cents FROM movies ORDER BY popularity DESC LIMIT 3')
+      .all() as Array<{ id: number; rent_price_cents: number; buy_price_cents: number }>;
+
+    if (rows[0]) {
+      createPurchase({
+        userId: cliente.id,
+        movieId: rows[0].id,
+        kind: 'rent',
+        status: 'paid',
+        amountCents: rows[0].rent_price_cents,
+        method: 'card',
+        cardLast4: '4242',
+      });
+    }
+    if (rows[1]) {
+      createPurchase({
+        userId: cliente.id,
+        movieId: rows[1].id,
+        kind: 'buy',
+        status: 'paid',
+        amountCents: rows[1].buy_price_cents,
+        method: 'card',
+        cardLast4: '4242',
+      });
+    }
+    console.log('[pelipop] Alquiler y compra de demostracion creados para cliente@pelipop.dev.');
+  }
+
   console.log(`[pelipop] Base de datos: ${config.databaseFile}`);
   console.log('\nCuentas de demo:');
   for (const user of USERS) {

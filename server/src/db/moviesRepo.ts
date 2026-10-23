@@ -21,6 +21,8 @@ interface MovieRow {
   video_source: MovieSource;
   video_url: string;
   trailer_url: string | null;
+  rent_price_cents: number;
+  buy_price_cents: number;
   featured: number;
 }
 
@@ -41,7 +43,8 @@ const COLUMNS = `
   m.id, m.slug, m.title, m.original_title, m.tagline, m.synopsis,
   m.release_year, m.release_date, m.runtime_minutes, m.age_rating,
   m.score, m.popularity, m.poster_url, m.backdrop_url,
-  m.video_source, m.video_url, m.trailer_url, m.featured
+  m.video_source, m.video_url, m.trailer_url, m.featured,
+  m.rent_price_cents, m.buy_price_cents
 `;
 
 const SORT_COLUMNS: Record<CatalogSort, string> = {
@@ -72,6 +75,8 @@ function toMovie(row: MovieRow, genres: Genre[]): Movie {
     videoUrl: row.video_url,
     streamUrl: `/api/movies/${row.id}/stream`,
     trailerUrl: row.trailer_url,
+    rentPriceCents: row.rent_price_cents,
+    buyPriceCents: row.buy_price_cents,
     featured: row.featured === 1,
     genres,
   };
@@ -271,6 +276,8 @@ export interface MovieInput {
   videoSource: MovieSource;
   videoUrl: string;
   trailerUrl?: string | null;
+  rentPriceCents?: number;
+  buyPriceCents?: number;
   featured: boolean;
   /** Slugs de genero; los desconocidos se crean al vuelo. */
   genres: string[];
@@ -314,11 +321,11 @@ export function createMovie(input: MovieInput): Movie {
       `INSERT INTO movies (
          slug, title, original_title, tagline, synopsis, release_year, release_date,
          runtime_minutes, age_rating, score, popularity, poster_url, backdrop_url,
-         video_source, video_url, trailer_url, featured
+         video_source, video_url, trailer_url, rent_price_cents, buy_price_cents, featured
        ) VALUES (
          @slug, @title, @originalTitle, @tagline, @synopsis, @releaseYear, @releaseDate,
          @runtimeMinutes, @ageRating, @score, @popularity, @posterUrl, @backdropUrl,
-         @videoSource, @videoUrl, @trailerUrl, @featured
+         @videoSource, @videoUrl, @trailerUrl, @rentPriceCents, @buyPriceCents, @featured
        )`,
     )
     .run({
@@ -338,6 +345,8 @@ export function createMovie(input: MovieInput): Movie {
       videoSource: input.videoSource,
       videoUrl: input.videoUrl,
       trailerUrl: input.trailerUrl ?? null,
+      rentPriceCents: input.rentPriceCents ?? 399,
+      buyPriceCents: input.buyPriceCents ?? 999,
       featured: input.featured ? 1 : 0,
     });
 
@@ -366,6 +375,7 @@ export function updateMovie(id: number, input: MovieInput): Movie | null {
          runtime_minutes = @runtimeMinutes, age_rating = @ageRating, score = @score,
          popularity = @popularity, poster_url = @posterUrl, backdrop_url = @backdropUrl,
          video_source = @videoSource, video_url = @videoUrl, trailer_url = @trailerUrl,
+         rent_price_cents = @rentPriceCents, buy_price_cents = @buyPriceCents,
          featured = @featured, updated_at = datetime('now')
        WHERE id = @id`,
     )
@@ -387,6 +397,8 @@ export function updateMovie(id: number, input: MovieInput): Movie | null {
       videoSource: input.videoSource,
       videoUrl: input.videoUrl,
       trailerUrl: input.trailerUrl ?? null,
+      rentPriceCents: input.rentPriceCents ?? existing.rentPriceCents,
+      buyPriceCents: input.buyPriceCents ?? existing.buyPriceCents,
       featured: input.featured ? 1 : 0,
     });
 

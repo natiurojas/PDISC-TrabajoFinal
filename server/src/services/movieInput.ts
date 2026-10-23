@@ -24,6 +24,16 @@ function optionalUrl(value: unknown, field: string): string | undefined {
   throw ApiError.badRequest(`El campo "${field}" debe ser una URL http(s) o una ruta que empiece por "/"`);
 }
 
+/** Precio en centimos: numero entero entre 0 (gratis) y 100000 (1000 EUR). */
+function optionalPriceCents(value: unknown, field: string): number | undefined {
+  const parsed = optionalNumber(value, field, { min: 0, max: 100_000 });
+  if (parsed === undefined) return undefined;
+  if (!Number.isInteger(parsed)) {
+    throw ApiError.badRequest(`El campo "${field}" debe ser un numero entero de centimos`);
+  }
+  return parsed;
+}
+
 /** Normaliza y valida el cuerpo de alta/edicion de una pelicula. */
 export function parseMovieInput(payload: unknown): MovieInput {
   const body = asBody(payload);
@@ -72,6 +82,8 @@ export function parseMovieInput(payload: unknown): MovieInput {
     videoSource,
     videoUrl,
     trailerUrl: optionalUrl(body.trailerUrl, 'trailerUrl') ?? null,
+    rentPriceCents: optionalPriceCents(body.rentPriceCents, 'rentPriceCents'),
+    buyPriceCents: optionalPriceCents(body.buyPriceCents, 'buyPriceCents'),
     featured: optionalBoolean(body.featured, 'featured') ?? false,
     genres: optionalStringArray(body.genres, 'genres')?.map((entry) => slugify(entry)) ?? [],
   };

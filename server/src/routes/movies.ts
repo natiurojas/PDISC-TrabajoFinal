@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { findMovieByIdOrSlug, listMovies, listSimilar, type CatalogFilters } from '../db/moviesRepo.js';
 import type { CatalogSort, SortOrder } from '../db/types.js';
+import { verifyPlaybackToken } from '../auth/playback.js';
 import { ApiError } from '../lib/errors.js';
 import {
   parseBoolean,
@@ -68,6 +69,20 @@ const streamHandler = asyncHandler(async (req, res) => {
   const idOrSlug = requireParam(req.params.idOrSlug, 'idOrSlug');
   const movie = findMovieByIdOrSlug(idOrSlug);
   if (!movie) throw ApiError.notFound(`No existe la pelicula "${idOrSlug}"`);
+
+  // Acceso: peliculas gratuitas, personal del catalogo o token de reproduccion.
+  const staff = req.user?.permissions.includes('movies:write') ?? false;
+  const free = movie.buyPriceCents <= 0;
+  const token = typeof req.query.t === 'string' ? req.query.t : undefined;
+  const tokenValid = token ? verifyPlaybackToken(token, movie.id) !== null : false;
+
+  if (!staff && !free && !tokenValid) {
+    throw new ApiError(
+      402,
+      'payment_required',
+      'Alquila o compra esta pelicula para poder reproducirla',
+    );
+  }
 
   const target = await openStream(movie, req.headers.range, req.method === 'HEAD');
 
