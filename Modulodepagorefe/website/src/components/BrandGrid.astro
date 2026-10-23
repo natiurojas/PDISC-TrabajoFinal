@@ -1,0 +1,18 @@
+---
+// The vanilla API rendering the site's own brand showcase — createCard runs
+// client-side for each brand tile.
+---
+
+<div class="brand-grid" id="brand-grid"></div>
+
+<script>
+  import { createCard } from 'crd-ui';
+  import { TEST_CARDS } from '../lib/test-cards';
+
+  const grid = document.getElementById('brand-grid')!;
+  for (const { number, name, expiry } of TEST_CARDS) {
+    const cell = document.createElement('div');
+    grid.appendChild(cell);
+    createCard(cell, { number, name, expiry, tilt: true });
+  }
+</script>

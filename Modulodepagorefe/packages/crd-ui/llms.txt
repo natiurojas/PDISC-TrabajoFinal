@@ -1,0 +1,71 @@
+# crd-ui
+
+> Framework-agnostic credit/debit card visualization for payment forms. Zero-dependency vanilla core with React, Vue and Svelte subpaths in a single npm package. Display-only: wire it to your own inputs; it never handles real card data.
+
+Full docs (markdown): https://crd-ui.juanda.co/llms-full.txt
+Website: https://crd-ui.juanda.co · GitHub: https://github.com/JuandaGarcia/crd-ui · MIT
+
+## Install
+
+npm i crd-ui
+
+Subpaths: `crd-ui` (vanilla core) · `crd-ui/react` · `crd-ui/vue` · `crd-ui/svelte` · `crd-ui/styles.css` (required stylesheet) · `crd-ui/styles.layer.css` (same, wrapped in an @layer crd-ui cascade layer, for utility-class users). Framework peers are optional.
+
+## Quick usage
+
+React (always import the stylesheet once):
+
+```tsx
+import { Card } from 'crd-ui/react';
+import 'crd-ui/styles.css';
+
+<Card number={number} name={name} expiry={expiry} cvc={cvc} focused={focused} />;
+```
+
+Vanilla:
+
+```js
+import { createCard } from 'crd-ui';
+import 'crd-ui/styles.css';
+
+const card = createCard(el, { number: '', name: '', expiry: '', cvc: '' });
+card.update({ number: '4111 1111', focused: 'cvc' }); // 'cvc' flips the card
+card.brand;     // 'visa' | 'mastercard' | ... | null
+card.destroy();
+```
+
+Vue: `import { Card } from 'crd-ui/vue'` — same props, emits `@brand-change`.
+Svelte: `import Card from 'crd-ui/svelte'` — same props, `onBrandChange` callback.
+
+## API (props / createCard options)
+
+- number, name, expiry, cvc: string — the values to display (masked/formatted automatically).
+- focused: 'number' | 'name' | 'expiry' | 'cvc' | null — highlights a section; 'cvc' flips to the back.
+- variant: 'sunset' (default, brand-tinted bloom) | 'ember' | 'holo' | 'porcelain' | 'graphite' | 'gradient' (classic per-brand gradient).
+- tilt: boolean (default false) — pointer-tracked 3D hover tilt with a light glare; toggleable via update()/prop. Hover-only: automatically flattened on touch devices (media hover:none) and under prefers-reduced-motion, and touch-action is restored so scrolling over the card works.
+- brand: Brand | null — force the displayed brand when the number never reaches you (e.g. Stripe Elements reports the brand; map its focus events to `focused` and the CVC focus flips the card). Use the exported helper `brandFromStripe(stripeSlug)` to translate Stripe's slugs ('diners' → 'dinersclub', 'unknown' → null). Omit for automatic detection. Full example: https://github.com/JuandaGarcia/crd-ui/tree/main/examples/stripe
+- last4: string — show only the last digits ('•••• •••• •••• 4242') when the full number is unknown: saved cards or post-tokenization (Stripe's PaymentMethod.card.last4). Ignored while `number` has digits.
+- layout: 'form' (default) | 'display' — 'form' is the payment-form preview (CVC on the back, flip on focus, name placeholder). 'display' presents an existing card for dashboards/saved-card views: expiry and CVC render on a meta row on the front, empty values stay masked, the empty name hides, and CVC focus no longer flips. Reveal by update()-ing the real number/expiry/cvc (fetched on demand). Locale labels: locale.exp ('Exp'), locale.cvc ('CVC').
+- copyable: boolean (display layout only, default false) — makes the revealed number, expiry and CVC click-to-copy with a "Copied" feedback bubble (masked values aren't copyable). On hover each field shows a 'Click to copy' hint (locale.copy), and after copying a 'Copied' bubble (locale.copied). Optional onCopy(field, value) callback (Vue emits 'copy') fires after each copy.
+- placeholders: { name?: string } · locale: { validThru?: string } · logos: Partial<Record<Brand, string>> — creation-time only; recreate (e.g. React `key`) to change.
+- onBrandChange(brand | null) — React/Svelte callback; Vue event `brand-change`.
+- Vanilla instance: { update(data), brand, element, destroy() }.
+
+Brands detected: visa, mastercard, amex, discover, dinersclub, jcb, unionpay, maestro, elo, hipercard.
+
+## Starter
+
+A checkout form using crd-ui, runnable in the browser: https://stackblitz.com/github/JuandaGarcia/crd-ui/tree/main/starters/react-checkout
+The same form as a Next.js App Router project: https://github.com/JuandaGarcia/crd-ui/tree/main/starters/nextjs-checkout
+
+## Coming from react-credit-cards
+
+`react-credit-cards` (unmaintained since June 2020, and failing to install on React 18/19 with ERESOLVE because it peers on `react@^15 || ^16`) and its fork `react-credit-cards-2` share the same prop API, and crd-ui is close to a drop-in replacement for both: `number`, `name`, `expiry`, `cvc` and `focused` keep their names and values. `placeholders` is unchanged; `locale: { valid }` -> `locale: { validThru }`; `preview` + `issuer` -> `layout: 'display'` + `brand` + `last4`; `$rccs-*` SCSS variables -> `--crd-*` CSS custom properties. Two have no direct equal: `callback(type, isValid)` -> `onBrandChange(brand)` plus the exported `detectBrand`/`getBrandSpec` helpers, and `acceptedCards` -> gate on the detected brand yourself. Full guide: https://crd-ui.juanda.co/migrate/react-credit-cards/
+
+## Theming
+
+Override CSS custom properties on `.crd` or any ancestor: `--crd-width`, `--crd-radius`, `--crd-color`, `--crd-bg`, `--crd-shadow`, `--crd-font`, `--crd-flip-duration`. Defaults are `var()` fallbacks, never declarations on `.crd`, so an inherited value always reaches the card and wins over the brand/variant themes. Brand themes are plain classes (`.crd--brand-visa`, ...). Built-in logos are generic (no trademarks); pass licensed SVGs via `logos`. The built-ins are exported as `LOGOS: Record<Brand, string>` (SVG markup) for rendering the same marks elsewhere or extending them: `logos: { ...LOGOS, visa: mySvg }`.
+
+Tailwind: arbitrary-property utilities theme the card with zero config — `<Card className="[--crd-radius:1rem] [--crd-bg:var(--color-indigo-600)]" />` (v4 var(--color-*), v3 theme(colors.*)). `className`/`class` targets the card root (.crd). Only utilities that override crd-ui's own rules (e.g. `text-2xl` vs the number's font-size) need the cascade layer: declare `@layer crd-ui, theme, base, components, utilities;` before `@import "tailwindcss";` and import `crd-ui/styles.layer.css` instead of `crd-ui/styles.css`.
+
+classNames: Partial<Record<CardSlot, string>> — utility-first styling of internal parts, merged with the built-in classes (state modifiers preserved). Slots (stable keys): root, inner, front, back, chip, logo, number, footer, name, expiry, expiryLabel, expiryValue, meta, metaExpiry, metaCvc, cvc.

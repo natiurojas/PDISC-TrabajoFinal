@@ -1,0 +1,712 @@
+/* crd-ui — card visualization styles.
+   Customize via the custom properties below; brand themes via .crd--brand-*. */
+
+/* The public knobs (--crd-*) are never declared on .crd itself — they are only
+   read, with the default supplied as the var() fallback. A declaration here
+   would beat any inherited value, so this is what lets a knob set anywhere
+   (an ancestor, a utility class, an inline style) actually reach the card.
+   Brand and variant themes feed the private --_crd-*-theme slots instead, so
+   a user value still takes precedence over them. */
+.crd {
+  --_crd-width: var(--crd-width, 290px);
+  --_crd-radius: var(--crd-radius, 14px);
+  --_crd-font: var(--crd-font, 'Avenir Next', 'Segoe UI', ui-sans-serif, sans-serif);
+  --_crd-color: var(--crd-color, var(--_crd-color-theme, #fff));
+  --_crd-bg: var(--crd-bg, var(--_crd-bg-theme, linear-gradient(135deg, #43464b, #1e2126)));
+  --_crd-shadow: var(--crd-shadow, 0 8px 24px rgba(0, 0, 0, 0.28));
+  --_crd-flip-duration: var(--crd-flip-duration, 0.75s);
+
+  width: var(--_crd-width);
+  aspect-ratio: 1.586; /* ISO/IEC 7810 ID-1 */
+  perspective: 1000px;
+  font-family: var(--_crd-font);
+  color: var(--_crd-color);
+}
+
+/* Brand themes */
+.crd--brand-visa      { --_crd-bg-theme: linear-gradient(135deg, #0f509e, #1399cd); }
+.crd--brand-mastercard{ --_crd-bg-theme: linear-gradient(135deg, #354057, #191c22); }
+.crd--brand-amex      { --_crd-bg-theme: linear-gradient(135deg, #106d90, #4ba6c3); }
+.crd--brand-discover  { --_crd-bg-theme: linear-gradient(135deg, #d05e28, #f2a33c); }
+.crd--brand-dinersclub{ --_crd-bg-theme: linear-gradient(135deg, #33526f, #6f9ab8); }
+.crd--brand-jcb       { --_crd-bg-theme: linear-gradient(135deg, #1d6b48, #37a26a); }
+.crd--brand-unionpay  { --_crd-bg-theme: linear-gradient(135deg, #274b70, #b23a48); }
+.crd--brand-maestro   { --_crd-bg-theme: linear-gradient(135deg, #45327a, #7a5fb8); }
+.crd--brand-elo       { --_crd-bg-theme: linear-gradient(135deg, #2d2d2d, #565656); }
+.crd--brand-hipercard { --_crd-bg-theme: linear-gradient(135deg, #8a1a2b, #c34a5a); }
+
+/* ---- Variants ----
+   Brand-agnostic finishes selected via the `variant` option; they override
+   the per-brand gradient (the brand still shows through its logo). Layered
+   CSS gradients + an SVG grain layer, no external assets. */
+
+.crd {
+  --crd-noise-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  --crd-noise-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Ember: warm grainy bloom over a dark crown, number on a dark band,
+   light lower body. */
+.crd--v-ember {
+  --_crd-color-theme: #17181c;
+  --_crd-bg-theme:
+    var(--crd-noise-light),
+    linear-gradient(180deg, rgba(10, 10, 12, 0.95) 0%, rgba(26, 19, 10, 0.85) 16%, rgba(140, 95, 30, 0.32) 32%, transparent 50%),
+    radial-gradient(90% 46% at 50% 24%, rgba(255, 176, 64, 0.6), rgba(255, 150, 40, 0.14) 58%, transparent 74%),
+    linear-gradient(180deg, transparent 37%, #101013 37%, #101013 61%, transparent 61%),
+    linear-gradient(180deg, #d9d6d0 0%, #f0efeb 100%);
+}
+
+.crd--v-ember .crd__number {
+  color: #f5f5f2;
+}
+
+.crd--v-ember .crd__logo {
+  color: #f2f2ef;
+}
+
+/* The back logo sits on the light lower body, not the dark crown. */
+.crd--v-ember .crd__logo--back {
+  color: #17181c;
+}
+
+.crd--v-ember .crd__name,
+.crd--v-ember .crd__expiry {
+  text-shadow: none;
+}
+
+.crd--v-ember .crd__ring {
+  box-shadow: 0 0 0 1.5px rgba(255, 165, 60, 0.9);
+}
+
+/* Holo: iridescent interference over near-black — two offset ripple fields
+   crossing over soft color blooms. */
+.crd--v-holo {
+  --_crd-color-theme: #f4f4f6;
+  --_crd-bg-theme:
+    var(--crd-noise-light),
+    repeating-radial-gradient(circle at 18% 30%, rgba(255, 255, 255, 0.1) 0 1.5px, transparent 1.5px 5px),
+    repeating-radial-gradient(circle at 82% 70%, rgba(255, 255, 255, 0.08) 0 1.5px, transparent 1.5px 6px),
+    radial-gradient(75% 90% at 22% 24%, rgba(64, 224, 208, 0.5), transparent 60%),
+    radial-gradient(70% 80% at 78% 30%, rgba(186, 120, 255, 0.45), transparent 60%),
+    radial-gradient(80% 90% at 60% 85%, rgba(255, 230, 120, 0.35), transparent 60%),
+    radial-gradient(70% 80% at 20% 80%, rgba(90, 160, 255, 0.4), transparent 60%),
+    linear-gradient(160deg, #16161c, #101014);
+}
+
+/* Porcelain: near-white with faint pastel washes, dark type. */
+.crd--v-porcelain {
+  --_crd-color-theme: #1d1d1f;
+  --_crd-bg-theme:
+    var(--crd-noise-dark),
+    radial-gradient(60% 70% at 12% 88%, rgba(255, 205, 120, 0.35), transparent 65%),
+    radial-gradient(55% 65% at 45% 65%, rgba(255, 140, 160, 0.22), transparent 65%),
+    radial-gradient(60% 75% at 88% 45%, rgba(130, 160, 255, 0.28), transparent 65%),
+    linear-gradient(180deg, #fbfafa, #f2f1f3);
+}
+
+.crd--v-porcelain .crd__number,
+.crd--v-porcelain .crd__name,
+.crd--v-porcelain .crd__expiry {
+  text-shadow: none;
+}
+
+.crd--v-porcelain .crd__ring {
+  box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.45);
+}
+
+/* Sunset (default): blooms on cream, name on a dark base band. The bloom
+   palette adapts to the detected brand via the custom properties below. */
+.crd--v-sunset {
+  --_crd-color-theme: #17171a;
+  --crd-sunset-a: rgba(255, 170, 40, 0.75);
+  --crd-sunset-b: rgba(70, 190, 255, 0.65);
+  --crd-sunset-c: rgba(255, 120, 190, 0.5);
+  --crd-sunset-ring: rgba(255, 140, 0, 0.9);
+  --_crd-bg-theme:
+    var(--crd-noise-light),
+    linear-gradient(180deg, transparent 64%, #131316 64%),
+    radial-gradient(55% 60% at 38% 34%, var(--crd-sunset-a), transparent 68%),
+    radial-gradient(50% 65% at 78% 38%, var(--crd-sunset-b), transparent 66%),
+    radial-gradient(45% 55% at 85% 78%, var(--crd-sunset-c), transparent 65%),
+    linear-gradient(180deg, #f6efe4, #f1eae2);
+}
+
+.crd--v-sunset .crd__number {
+  text-shadow: none;
+}
+
+.crd--v-sunset .crd__name,
+.crd--v-sunset .crd__expiry {
+  color: #f4f4f2;
+}
+
+/* The back logo sits on the dark base band. */
+.crd--v-sunset .crd__logo--back {
+  color: #f4f4f2;
+}
+
+.crd--v-sunset .crd__ring {
+  box-shadow: 0 0 0 1.5px var(--crd-sunset-ring);
+}
+
+/* Brand-tinted sunset blooms */
+.crd--v-sunset.crd--brand-visa {
+  --crd-sunset-a: rgba(35, 95, 220, 0.6);
+  --crd-sunset-b: rgba(95, 200, 255, 0.55);
+  --crd-sunset-c: rgba(150, 125, 255, 0.4);
+  --crd-sunset-ring: rgba(35, 95, 220, 0.9);
+}
+
+.crd--v-sunset.crd--brand-mastercard {
+  --crd-sunset-a: rgba(255, 95, 40, 0.65);
+  --crd-sunset-b: rgba(255, 185, 40, 0.6);
+  --crd-sunset-c: rgba(230, 60, 60, 0.4);
+  --crd-sunset-ring: rgba(240, 90, 35, 0.9);
+}
+
+.crd--v-sunset.crd--brand-amex {
+  --crd-sunset-a: rgba(35, 140, 195, 0.6);
+  --crd-sunset-b: rgba(110, 220, 230, 0.5);
+  --crd-sunset-c: rgba(60, 115, 220, 0.4);
+  --crd-sunset-ring: rgba(35, 140, 195, 0.9);
+}
+
+.crd--v-sunset.crd--brand-discover {
+  --crd-sunset-a: rgba(255, 135, 30, 0.7);
+  --crd-sunset-b: rgba(255, 205, 85, 0.55);
+  --crd-sunset-c: rgba(250, 105, 60, 0.45);
+  --crd-sunset-ring: rgba(245, 125, 30, 0.9);
+}
+
+.crd--v-sunset.crd--brand-dinersclub {
+  --crd-sunset-a: rgba(70, 110, 165, 0.55);
+  --crd-sunset-b: rgba(140, 185, 225, 0.5);
+  --crd-sunset-c: rgba(100, 140, 255, 0.35);
+  --crd-sunset-ring: rgba(70, 110, 165, 0.9);
+}
+
+.crd--v-sunset.crd--brand-jcb {
+  --crd-sunset-a: rgba(45, 165, 95, 0.6);
+  --crd-sunset-b: rgba(65, 130, 230, 0.5);
+  --crd-sunset-c: rgba(230, 75, 95, 0.4);
+  --crd-sunset-ring: rgba(45, 165, 95, 0.9);
+}
+
+.crd--v-sunset.crd--brand-unionpay {
+  --crd-sunset-a: rgba(220, 65, 75, 0.55);
+  --crd-sunset-b: rgba(45, 155, 165, 0.5);
+  --crd-sunset-c: rgba(55, 95, 175, 0.4);
+  --crd-sunset-ring: rgba(220, 65, 75, 0.9);
+}
+
+.crd--v-sunset.crd--brand-maestro {
+  --crd-sunset-a: rgba(10, 95, 205, 0.55);
+  --crd-sunset-b: rgba(240, 75, 60, 0.5);
+  --crd-sunset-c: rgba(255, 155, 60, 0.4);
+  --crd-sunset-ring: rgba(10, 95, 205, 0.9);
+}
+
+.crd--v-sunset.crd--brand-elo {
+  --crd-sunset-a: rgba(255, 200, 45, 0.6);
+  --crd-sunset-b: rgba(235, 65, 60, 0.5);
+  --crd-sunset-c: rgba(45, 85, 205, 0.4);
+  --crd-sunset-ring: rgba(235, 65, 60, 0.9);
+}
+
+.crd--v-sunset.crd--brand-hipercard {
+  --crd-sunset-a: rgba(200, 45, 65, 0.6);
+  --crd-sunset-b: rgba(255, 115, 95, 0.5);
+  --crd-sunset-c: rgba(255, 65, 105, 0.35);
+  --crd-sunset-ring: rgba(200, 45, 65, 0.9);
+}
+
+/* Graphite: brushed near-black with fine vertical pinstripes and a deep
+   left edge. */
+.crd--v-graphite {
+  --_crd-color-theme: #e8e9ec;
+  --_crd-bg-theme:
+    var(--crd-noise-light),
+    linear-gradient(90deg, rgba(5, 6, 8, 0.9) 0%, rgba(5, 6, 8, 0.75) 10%, transparent 13%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 7px),
+    linear-gradient(115deg, #262930 0%, #1a1c21 45%, #23262c 70%, #16181c 100%);
+}
+
+.crd__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  /* Springy rotation: overshoots ~180° and settles back. */
+  transition: transform var(--_crd-flip-duration) cubic-bezier(0.34, 1.3, 0.5, 1);
+}
+
+.crd--flipped .crd__inner {
+  transform: rotateY(180deg);
+}
+
+/* ---- Flip choreography ----
+   .crd--flipping is added transiently by the core on every flip: the card
+   jumps off the surface in an arc with a wrist-flick tilt, its shadow
+   deepens while airborne, and a light sheen sweeps across the faces. */
+
+.crd--flipping {
+  animation: crd-lift var(--_crd-flip-duration) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes crd-lift {
+  0% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  35% {
+    transform: translateY(-7%) scale(1.06) rotate(-2.5deg);
+  }
+  70% {
+    transform: translateY(-4%) scale(1.04) rotate(1.2deg);
+  }
+  100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+.crd--flipping .crd__front,
+.crd--flipping .crd__back {
+  animation: crd-airborne-shadow var(--_crd-flip-duration) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes crd-airborne-shadow {
+  0%,
+  100% {
+    box-shadow: var(--_crd-shadow);
+  }
+  45% {
+    box-shadow: 0 34px 54px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* Sheen layer: parked fully transparent, swept during the flip. */
+.crd__front::after,
+.crd__back::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.32) 48%,
+    rgba(255, 255, 255, 0.08) 53%,
+    transparent 62%
+  );
+  background-size: 260% 100%;
+  background-position: 135% 0;
+}
+
+.crd--flipping .crd__front::after,
+.crd--flipping .crd__back::after {
+  animation: crd-sheen var(--_crd-flip-duration) ease;
+}
+
+@keyframes crd-sheen {
+  from {
+    background-position: 135% 0;
+  }
+  to {
+    background-position: -35% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crd__inner {
+    transition: none;
+  }
+
+  .crd--flipping,
+  .crd--flipping .crd__front,
+  .crd--flipping .crd__back,
+  .crd--flipping .crd__front::after,
+  .crd--flipping .crd__back::after {
+    animation: none;
+  }
+}
+
+/* ---- Hover tilt (opt-in via the `tilt` option) ----
+   Adapted from Transitions.dev's card tilt: the pointer position (written by
+   the core into --crd-tilt-* custom properties) rotates the card in 3D and
+   drives a cursor-tracked glare. A faster transition while hovering makes the
+   tilt follow the cursor; on leave it eases slowly back to flat. */
+
+.crd--tilt {
+  position: relative;
+  touch-action: none;
+  transform: perspective(1000px) rotateX(var(--crd-tilt-rx, 0deg))
+    rotateY(var(--crd-tilt-ry, 0deg));
+  transition: transform 1000ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.crd--tilt.crd--tilt-hover {
+  transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Cursor-tracked glare: layered soft circles that add like light (screen
+   blend) at the pointer position. Only shown while tilt is on and hovered. */
+.crd__glare {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--_crd-radius);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 3;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(
+      circle 95px at var(--crd-tilt-gx, 50%) var(--crd-tilt-gy, 50%),
+      rgba(255, 255, 255, 0.48),
+      rgba(255, 255, 255, 0.06) 52%,
+      rgba(255, 255, 255, 0) 84%
+    ),
+    radial-gradient(
+      circle 200px at var(--crd-tilt-gx, 50%) var(--crd-tilt-gy, 50%),
+      rgba(255, 255, 255, 0.22),
+      rgba(255, 255, 255, 0.04) 58%,
+      rgba(255, 255, 255, 0) 78%
+    ),
+    radial-gradient(
+      circle 360px at var(--crd-tilt-gx, 50%) var(--crd-tilt-gy, 50%),
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0) 88%
+    );
+  transition: opacity 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.crd--tilt.crd--tilt-hover .crd__glare {
+  opacity: 0.32;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crd--tilt {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .crd__glare {
+    display: none;
+  }
+}
+
+/* The tilt tracks a cursor, so it's a hover-only enhancement: on touch devices
+   it's flattened, the glare hidden, and touch-action restored — otherwise the
+   pointer-driven tilt fires erratically on tap and its touch-action:none
+   swallows scroll gestures over the card. */
+@media (hover: none) {
+  .crd--tilt {
+    transform: none !important;
+    transition: none !important;
+    touch-action: auto;
+  }
+
+  .crd--tilt .crd__glare {
+    display: none;
+  }
+}
+
+.crd__front,
+.crd__back {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--_crd-radius);
+  background: var(--_crd-bg);
+  box-shadow: var(--_crd-shadow);
+  backface-visibility: hidden;
+  overflow: hidden;
+  padding: 6.5%;
+  box-sizing: border-box;
+}
+
+.crd__back {
+  transform: rotateY(180deg);
+  padding: 0;
+}
+
+/* ---- Front ---- */
+
+.crd__chip {
+  width: 15%;
+  color: #d4b26a;
+}
+
+.crd__chip svg,
+.crd__logo svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.crd__logo {
+  position: absolute;
+  top: 6.5%;
+  right: 6.5%;
+  width: 26%;
+  color: var(--_crd-color);
+}
+
+.crd__number {
+  margin-top: 9%;
+  font-size: calc(var(--_crd-width) / 17.5);
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.crd__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 4%;
+  margin-top: 8%;
+}
+
+.crd__name {
+  font-size: calc(var(--_crd-width) / 24);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crd__name--placeholder {
+  opacity: 0.55;
+}
+
+.crd__expiry {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.crd__expiry-label {
+  display: block;
+  font-size: calc(var(--_crd-width) / 41);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.65;
+}
+
+.crd__expiry-value {
+  font-size: calc(var(--_crd-width) / 24);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Display layout ----
+   Presents an existing card (dashboards): expiry and CVC sit on a meta row on
+   the front, under the number. Hidden by default; the layout='display' class
+   reveals it and hides the form-mode expiry in the footer. */
+
+.crd__meta {
+  display: none;
+}
+
+.crd--l-display .crd__meta {
+  display: flex;
+  gap: 9%;
+  margin-top: 6%;
+}
+
+.crd__meta-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5em;
+}
+
+.crd__meta-label {
+  font-size: calc(var(--_crd-width) / 30);
+  letter-spacing: 0.02em;
+  opacity: 0.55;
+}
+
+.crd__meta-expiry,
+.crd__meta-cvc {
+  font-size: calc(var(--_crd-width) / 22);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+
+.crd--l-display .crd__footer .crd__expiry {
+  display: none;
+}
+
+.crd--l-display .crd__footer {
+  margin-top: 5%;
+}
+
+/* Copyable fields: a subtle hover affordance and a transient "Copied" bubble.
+   The number/expiry already carry padding + radius from the focus-ring block;
+   the meta values get their own so the hover pill wraps them snugly. */
+[data-crd-copy] {
+  position: relative;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s ease-out;
+}
+
+.crd__meta-expiry[data-crd-copy],
+.crd__meta-cvc[data-crd-copy] {
+  padding: 1px 5px;
+  margin: -1px -5px;
+}
+
+[data-crd-copy]:hover,
+[data-crd-copy]:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+  outline: none;
+}
+
+/* Shared bubble above the field: 'Click to copy' on hover, 'Copied' after a
+   copy. One ::after, its content swapped by state. */
+[data-crd-copy]::after {
+  content: attr(data-copy-label);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.15em 0.5em;
+  border-radius: 5px;
+  background: rgba(20, 20, 24, 0.92);
+  color: #fff;
+  font-size: calc(var(--_crd-width) / 30);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+
+[data-crd-copy]:hover::after,
+[data-crd-copy]:focus-visible::after {
+  opacity: 1;
+}
+
+/* The copied state wins over hover (later rule) and fades itself out. */
+[data-crd-copy][data-copied]::after {
+  content: attr(data-copied-label);
+  opacity: 1;
+  animation: crd-copied 1.2s ease-out forwards;
+}
+
+@keyframes crd-copied {
+  0%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-crd-copy]::after {
+    transition: none;
+  }
+  [data-crd-copy][data-copied]::after {
+    animation: none;
+  }
+}
+
+/* ---- Focus ring ----
+   A single ring element travels between the focused sections, sliding and
+   resizing with a spring — the core keeps its transform/size in sync. */
+
+.crd__number,
+.crd__name,
+.crd__expiry {
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin-left: -6px;
+}
+
+.crd__ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.7);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.4s cubic-bezier(0.3, 1.35, 0.45, 1),
+    width 0.4s cubic-bezier(0.3, 1.35, 0.45, 1),
+    height 0.4s cubic-bezier(0.3, 1.35, 0.45, 1),
+    opacity 0.18s ease;
+}
+
+.crd__ring--on {
+  opacity: 1;
+}
+
+/* Applied for one frame when the ring (re)appears, so it materializes on the
+   new section instead of sliding in from a stale position. */
+.crd__ring--instant {
+  transition: opacity 0.18s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crd__ring {
+    transition: opacity 0.18s ease;
+  }
+}
+
+/* ---- Back ---- */
+
+.crd__stripe {
+  margin-top: 8%;
+  height: 18%;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.crd__signature {
+  margin: 6% 6.5% 0;
+  height: 16%;
+  border-radius: 5px;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.85),
+    rgba(255, 255, 255, 0.85) 3px,
+    rgba(220, 220, 220, 0.85) 3px,
+    rgba(220, 220, 220, 0.85) 6px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 3%;
+  box-sizing: border-box;
+}
+
+.crd__cvc {
+  color: #333;
+  font-size: calc(var(--_crd-width) / 26);
+  font-style: italic;
+  letter-spacing: 0.15em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The back has no traveling ring, so CVC focus highlights the signature
+   strip itself — same stroke as the front ring. */
+.crd__signature {
+  transition: box-shadow 0.18s ease;
+}
+
+.crd--focus-cvc .crd__signature {
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.7);
+}
+
+.crd__logo--back {
+  top: auto;
+  bottom: 6.5%;
+  width: 20%;
+  opacity: 0.85;
+}

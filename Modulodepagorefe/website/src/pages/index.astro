@@ -1,0 +1,427 @@
+---
+import { Code } from 'astro:components';
+import 'crd-ui/styles.css';
+import '../styles/site.css';
+import FrameworkSelect from '../components/FrameworkSelect.astro';
+import FrameworkTabs from '../components/FrameworkTabs.astro';
+import TOC from '../components/TOC.astro';
+import CreatedBy from '../components/CreatedBy.astro';
+import BrandGrid from '../components/BrandGrid.astro';
+import { HeroCard } from '../components/HeroCard';
+import { Playground } from '../components/Playground';
+import { DisplayDemo } from '../components/DisplayDemo';
+import {
+  backgroundUsage,
+  displayExample,
+  localization,
+  logos,
+  stripeExample,
+  theming,
+  themingClassNames,
+  themingImage,
+  themingImageTailwind,
+  themingLayer,
+  themingTailwind,
+  usage,
+} from '../lib/snippets';
+import ImageCards from '../components/ImageCards.astro';
+import BackgroundLibrary from '../components/BackgroundLibrary.astro';
+import { API_ROWS } from '../lib/api';
+import { BACKGROUNDS } from '../lib/backgrounds';
+import BaseHead from '../components/BaseHead.astro';
+import CopyPage from '../components/CopyPage.astro';
+import Dock from '../components/Dock.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
+import { SideRays } from '../components/SideRays';
+
+const themes = { light: 'github-light', dark: 'github-dark' };
+---
+
+<!doctype html>
+<html lang="en" data-fw="react">
+  <head>
+    <BaseHead
+      title="crd-ui — Credit Card Component for React, Vue, Svelte & Vanilla JS"
+      description="A credit & debit card component for payment forms: live brand detection, 3D flip, themeable variants. Zero dependencies — React, Vue, Svelte and vanilla JS in one package."
+      ogDescription="A credit & debit card component for payment forms: live brand detection, 3D flip, themeable variants. Zero dependencies."
+      path="/"
+    >
+      <link rel="alternate" type="text/markdown" href="/index.md" title="crd-ui docs as Markdown" />
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'crd-ui',
+        description:
+          'Framework-agnostic credit/debit card visualization component for payment forms. Zero-dependency vanilla core with React, Vue and Svelte adapters.',
+        url: 'https://crd-ui.juanda.co/',
+        image: 'https://crd-ui.juanda.co/banner.png',
+        applicationCategory: 'DeveloperApplication',
+        operatingSystem: 'Web',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+        license: 'https://opensource.org/license/mit',
+        author: { '@type': 'Person', name: 'Juanda Garcia', url: 'https://github.com/JuandaGarcia' },
+        sameAs: [
+          'https://github.com/JuandaGarcia/crd-ui',
+          'https://www.npmjs.com/package/crd-ui',
+        ],
+      })}
+    />
+    </BaseHead>
+  </head>
+  <body>
+    <div class="top-utils">
+      <ThemeToggle />
+      <CopyPage />
+    </div>
+    <div class="hero-rays" aria-hidden="true">
+      <SideRays
+        client:load
+        origin="top-left"
+        rayColor1="#eab308"
+        rayColor2="#96c8ff"
+        speed={2.5}
+        intensity={2}
+        spread={2}
+        tilt={0}
+        saturation={1.5}
+        blend={0.75}
+        falloff={1.6}
+        opacity={1}
+      />
+    </div>
+
+    <div class="container masthead">
+      <h1>crd-ui</h1>
+      <span class="for">for</span>
+      <FrameworkSelect />
+    </div>
+
+    <TOC />
+
+    <main>
+      <div class="hero container">
+        <div class="hero-card"><HeroCard client:load /></div>
+        <p class="tagline">
+          A credit &amp; debit card component for React, Vue, Svelte and vanilla JS.
+          Dependency-free. Themeable. Localizable.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="copy-install" type="button">
+            <span class="cmd">npm i crd-ui</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="9" y="9" width="12" height="12" rx="2"></rect>
+              <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+            </svg>
+          </button>
+          <a class="btn btn-secondary" href="https://github.com/JuandaGarcia/crd-ui" target="_blank" rel="noopener">
+            GitHub
+          </a>
+        </div>
+      </div>
+
+      <div class="container prose">
+        <section id="playground">
+          <h2>Try it</h2>
+          <p>
+            Type below, or pick a test number to try a brand — it fills the form and copies to
+            your clipboard. Brand detection, formatting and the CVC flip are all built in.
+          </p>
+          <Playground client:load />
+        </section>
+
+        <section id="usage">
+          <h2>Usage</h2>
+          <p>
+            One package for every framework. The core is vanilla; adapters are subpath imports.
+          </p>
+          <FrameworkTabs />
+          <div class="fw-block" data-block="react">
+            <Code code={usage.react} lang="tsx" themes={themes} />
+          </div>
+          <div class="fw-block" data-block="vanilla">
+            <Code code={usage.vanilla} lang="js" themes={themes} />
+          </div>
+          <div class="fw-block" data-block="vue">
+            <Code code={usage.vue} lang="vue" themes={themes} />
+          </div>
+          <div class="fw-block" data-block="svelte">
+            <Code code={usage.svelte} lang="svelte" themes={themes} />
+          </div>
+        </section>
+
+        <section id="brands">
+          <h2>Brands</h2>
+          <p>
+            Live detection for 10 brands, each with its own theme. This grid is rendered by the
+            vanilla <code>createCard</code> API.
+          </p>
+          <BrandGrid />
+        </section>
+
+        <section id="display">
+          <h2>Display</h2>
+          <p>
+            Set <code>layout="display"</code> to present a card the user already owns —
+            dashboards, saved-card lists, wallet views. Expiry and CVC move to the front, empty
+            values stay masked, and the CVC no longer flips. Start with <code>last4</code> and
+            <em>reveal</em> by passing the real values (fetched securely on demand) — the
+            component only presents, it never stores data.
+          </p>
+          <p>
+            With <code>copyable</code>, each revealed field is click-to-copy (try it below after
+            revealing). An optional <code>onCopy(field, value)</code> fires for your own toast.
+          </p>
+          <DisplayDemo client:visible />
+          <FrameworkTabs />
+          <div class="fw-block" data-block="react">
+            <Code code={displayExample.react} lang="tsx" themes={themes} />
+          </div>
+          <div class="fw-block" data-block="vanilla">
+            <Code code={displayExample.vanilla} lang="js" themes={themes} />
+          </div>
+          <div class="fw-block" data-block="vue">
+            <Code code={displayExample.vue} lang="vue" themes={themes} />
+          </div>
+          <div class="fw-block" data-block="svelte">
+            <Code code={displayExample.svelte} lang="svelte" themes={themes} />
+          </div>
+        </section>
+
+        <section id="theming">
+          <h2>Theming</h2>
+          <p>
+            Override CSS custom properties on <code>.crd</code> or any ancestor — the defaults
+            are <code>var()</code> fallbacks, never declarations on the card, so an inherited
+            value always reaches it.
+          </p>
+          <Code code={theming} lang="css" themes={themes} />
+          <p>
+            <code>--crd-bg</code> is a full CSS background, so images work as well as
+            gradients — bring your own artwork:
+          </p>
+          <Code code={themingImage} lang="css" themes={themes} />
+          <ImageCards />
+          <h3 class="subhead">With Tailwind</h3>
+          <p>
+            Every knob is a CSS variable, so Tailwind arbitrary-property utilities theme the card
+            with zero config. <code>className</code> goes to the card root, and utilities beat the
+            brand and variant themes:
+          </p>
+          <Code code={themingTailwind} lang="tsx" themes={themes} />
+          <p>The image background above, as a utility:</p>
+          <Code code={themingImageTailwind} lang="tsx" themes={themes} />
+          <p>
+            One case needs setup: utilities that override the card's <em>own</em> rules — say
+            <code>text-2xl</code> against the number's font size. Tailwind puts utilities in
+            <code>@layer utilities</code> and unlayered CSS always wins, so load the pre-layered
+            build and order the layer first:
+          </p>
+          <Code code={themingLayer} lang="css" themes={themes} />
+          <h3 class="subhead">Style any section</h3>
+          <p>
+            The library owns the card's markup, so to add utility classes to its internal parts
+            pass a <code>classNames</code> slot map — merged with the built-in classes, using
+            stable slot keys so your styles never depend on internal class names:
+          </p>
+          <Code code={themingClassNames} lang="tsx" themes={themes} />
+          <p>
+            The built-in brand marks are deliberately generic so the package ships no trademarked
+            assets — pass your own SVGs if you're licensed to use the official ones:
+          </p>
+          <FrameworkTabs />
+          <div class="fw-block" data-block="react">
+            <Code code={logos.react} lang="tsx" themes={themes} />
+          </div>
+          <div class="fw-block" data-block="vanilla">
+            <Code code={logos.vanilla} lang="js" themes={themes} />
+          </div>
+          <div class="fw-block" data-block="vue">
+            <Code code={logos.vue} lang="vue" themes={themes} />
+          </div>
+          <div class="fw-block" data-block="svelte">
+            <Code code={logos.svelte} lang="svelte" themes={themes} />
+          </div>
+        </section>
+
+        <section id="backgrounds">
+          <h2>Backgrounds</h2>
+          <p>
+            Artwork for the cards you build — {BACKGROUNDS.length} originals, each already at
+            the card's ratio so it fills <code>--crd-bg</code> without cropping. Click any one
+            to download it. They're released under
+            <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a>,
+            so use them anywhere, commercially included, with no attribution required.
+          </p>
+          <Code code={backgroundUsage} lang="css" themes={themes} />
+          <BackgroundLibrary />
+        </section>
+
+        <section id="localization">
+          <h2>Localization</h2>
+          <p>Every label and placeholder on the card is configurable.</p>
+          <FrameworkTabs />
+          <div class="fw-block" data-block="react">
+            <Code code={localization.react} lang="tsx" themes={themes} />
+          </div>
+          <div class="fw-block" data-block="vanilla">
+            <Code code={localization.vanilla} lang="js" themes={themes} />
+          </div>
+          <div class="fw-block" data-block="vue">
+            <Code code={localization.vue} lang="vue" themes={themes} />
+          </div>
+          <div class="fw-block" data-block="svelte">
+            <Code code={localization.svelte} lang="svelte" themes={themes} />
+          </div>
+        </section>
+
+        <section id="stripe">
+          <h2>Stripe</h2>
+          <p>
+            crd-ui is display-only, which makes it a natural fit for PCI-scoped providers like
+            Stripe Elements: the card number lives in Stripe's iframes and never reaches your
+            code, but Stripe reports the <em>metadata</em> a preview needs — the detected brand
+            and per-field focus. Feed those to the <code>brand</code> and <code>focused</code>
+            props and the preview shows the right logo, flips on CVC focus, and keeps every
+            digit masked.
+          </p>
+          <Code code={stripeExample} lang="tsx" themes={themes} />
+          <p>
+            The digits only become visible <em>after</em> tokenization: Stripe's
+            <code>PaymentMethod</code> reports <code>card.last4</code> and the expiry, so the
+            <code>last4</code> prop can render the confirmed card
+            (<code>•••• •••• •••• 4242</code>) — same pattern for displaying saved cards.
+          </p>
+          <p>
+            Full working example (Vite + React + Stripe test mode) in
+            <a href="https://github.com/JuandaGarcia/crd-ui/tree/main/examples/stripe" target="_blank" rel="noopener"><code>examples/stripe</code></a>.
+            The same events exist in vanilla <code>@stripe/stripe-js</code>, and the pattern
+            applies to any provider that reports brand/focus without exposing the number.
+          </p>
+        </section>
+
+        <section id="api">
+          <h2>API</h2>
+          <p>
+            Props of <code>&lt;Card /&gt;</code> — the vanilla <code>createCard(container, options)</code> accepts the same fields and returns
+            <code>&#123; update, brand, element, destroy &#125;</code>.
+          </p>
+          <div class="api-scroll">
+            <table class="api-table">
+              <thead>
+                <tr><th>Prop</th><th>Type</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                {API_ROWS.map((row) => (
+                  <tr>
+                    <td><code>{row.prop}</code></td>
+                    <td><code>{row.type}</code></td>
+                    <td>{row.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="ai">
+          <h2>AI &amp; agents</h2>
+          <p>
+            The docs are built for LLMs too. Everything on this page is available as plain
+            markdown, following the <a href="https://llmstxt.org" target="_blank" rel="noopener">llms.txt</a> convention:
+          </p>
+          <ul class="ai-list">
+            <li>
+              <a href="/llms.txt"><code>/llms.txt</code></a> — concise index for assistants.
+            </li>
+            <li>
+              <a href="/llms-full.txt"><code>/llms-full.txt</code></a> — the full documentation
+              in one markdown file (also at <a href="/index.md"><code>/index.md</code></a>).
+            </li>
+            <li>
+              <code>node_modules/crd-ui/llms.txt</code> — a compact version ships inside the
+              npm package, so agents can read it right from your project.
+            </li>
+            <li>
+              <a href="https://github.com/JuandaGarcia/crd-ui/blob/main/AGENTS.md" target="_blank" rel="noopener"><code>AGENTS.md</code></a>
+              — guides coding agents contributing to the repo.
+            </li>
+          </ul>
+          <p>
+            Or use the <strong>Copy Page</strong> button in the top-right corner: copy the whole
+            page as markdown, or open it directly in Claude or ChatGPT.
+          </p>
+        </section>
+
+        <footer class="site-footer">
+          <CreatedBy />
+        </footer>
+      </div>
+    </main>
+
+    <Dock />
+
+    <script>
+      // The service worker was retired: unregister it and drop its caches for
+      // visitors who still carry one from an earlier deploy.
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then((regs) => {
+          for (const reg of regs) reg.unregister();
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then((keys) => {
+          for (const key of keys) if (key.startsWith('crd-ui-')) caches.delete(key);
+        });
+      }
+
+      const btn = document.getElementById('copy-install')!;
+      const btnIcon = btn.querySelector('svg')!;
+      const btnIconPaths = btnIcon.innerHTML;
+      let installResetTimer: ReturnType<typeof setTimeout> | undefined;
+      btn.addEventListener('click', async () => {
+        await navigator.clipboard.writeText('npm i crd-ui');
+        const label = btn.querySelector('.cmd')!;
+        label.textContent = 'copied!';
+        btnIcon.innerHTML = '<path d="M20 6 9 17l-5-5"></path>';
+        clearTimeout(installResetTimer);
+        installResetTimer = setTimeout(() => {
+          label.textContent = 'npm i crd-ui';
+          btnIcon.innerHTML = btnIconPaths;
+        }, 1200);
+      });
+
+      // Floating copy button on every code block. The pre is wrapped so the
+      // button doesn't scroll away with wide code (overflow-x lives on the pre).
+      const COPY_ICON =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>';
+      const CHECK_ICON =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>';
+
+      for (const pre of document.querySelectorAll<HTMLElement>('pre.astro-code')) {
+        const wrap = document.createElement('div');
+        wrap.className = 'code-block';
+        pre.parentNode!.insertBefore(wrap, pre);
+        wrap.appendChild(pre);
+
+        const copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.className = 'code-copy';
+        copyBtn.setAttribute('aria-label', 'Copy code');
+        copyBtn.innerHTML = COPY_ICON;
+        copyBtn.addEventListener('click', async () => {
+          await navigator.clipboard.writeText(pre.textContent ?? '');
+          copyBtn.classList.add('is-copied');
+          copyBtn.innerHTML = CHECK_ICON;
+          setTimeout(() => {
+            copyBtn.classList.remove('is-copied');
+            copyBtn.innerHTML = COPY_ICON;
+          }, 1200);
+        });
+        wrap.appendChild(copyBtn);
+      }
+    </script>
+  </body>
+</html>

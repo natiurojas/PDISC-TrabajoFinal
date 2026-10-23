@@ -1,0 +1,1421 @@
+/* crd-ui website.
+   Design adapted from the NumberFlow site by Maxwell Barvian
+   (github.com/barvian/number-flow, MIT) — rebuilt in vanilla CSS. */
+
+:root {
+  --zinc-50: #fafafa;
+  --zinc-100: #f4f4f5;
+  --zinc-150: #ececee;
+  --zinc-200: #e4e4e7;
+  --zinc-300: #d4d4d8;
+  --zinc-400: #a1a1aa;
+  --zinc-500: #71717a;
+  --zinc-600: #52525b;
+  --zinc-700: #3f3f46;
+  --zinc-800: #27272a;
+  --zinc-900: #18181b;
+  --zinc-950: #09090b;
+
+  /* Dark is the site's default, independent of the OS setting — the theme
+     toggle opts into light and persists the choice. Keeping dark as the
+     unattributed base means it also holds if the theme script never runs. */
+  --bg: var(--zinc-950);
+  --text: var(--zinc-50);
+  --body: var(--zinc-300);
+  --muted: var(--zinc-400);
+  --border-faint: var(--zinc-800);
+  --ring: rgba(255, 255, 255, 0.1);
+  --dock-bg: rgba(24, 24, 27, 0.38);
+  --dock-item-active: rgba(255, 255, 255, 0.125);
+  --popover-bg: var(--zinc-950);
+  --btn-primary-bg: var(--zinc-100);
+  --btn-primary-text: var(--zinc-900);
+  --hover-wash: var(--zinc-900);
+  --accent: #3b82f6;
+
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg: color-mix(in srgb, var(--zinc-50), white 33%);
+  --text: var(--zinc-950);
+  --body: var(--zinc-600);
+  --muted: var(--zinc-500);
+  --border-faint: var(--zinc-150);
+  --ring: rgba(0, 0, 0, 0.08);
+  --dock-bg: rgba(244, 244, 245, 0.45);
+  --dock-item-active: #ffffff;
+  --popover-bg: #ffffff;
+  --btn-primary-bg: var(--zinc-900);
+  --btn-primary-text: var(--zinc-50);
+  --hover-wash: var(--zinc-100);
+
+  color-scheme: light;
+}
+
+html[data-fw='react'] {
+  --accent: #58c4dc;
+}
+
+html[data-fw='vanilla'] {
+  --accent: #f0db4f;
+}
+
+html[data-fw='vue'] {
+  --accent: #41b883;
+}
+
+html[data-fw='svelte'] {
+  --accent: #ff3e00;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100vh;
+  scroll-padding-top: 2.5rem;
+  overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  padding-top: clamp(3rem, 8vw, 7rem);
+  padding-bottom: clamp(10rem, 16vw, 13rem);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.container {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 4vw, 2.5rem);
+}
+
+/* ---- Masthead: "crd-ui for [React ▾]" ---- */
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  white-space: nowrap;
+  text-align: center;
+  font-weight: 500;
+  gap: 0.35em;
+}
+
+.masthead h1 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.masthead .for {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* ---- Framework menu (inline, popover) ---- */
+
+.fw-select {
+  position: relative;
+  display: inline-block;
+}
+
+.fw-select summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  /* Baseline so "React" sits on the same line as "crd-ui for";
+     icon and chevron re-center themselves below. */
+  align-items: baseline;
+  gap: 0.375rem;
+  padding: 0.25rem 0.375rem 0.25rem 0.5rem;
+  margin: -0.25rem -0.375rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  color: var(--text);
+  user-select: none;
+  transition: background 0.16s ease-out;
+}
+
+.fw-select summary:hover,
+.fw-select[open] summary {
+  background: var(--hover-wash);
+}
+
+.fw-select summary::-webkit-details-marker {
+  display: none;
+}
+
+.fw-select summary .chevron {
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted);
+  transition: transform 0.15s ease-out;
+}
+
+.fw-select summary .fw-icon,
+.fw-select summary .chevron {
+  align-self: center;
+}
+
+.fw-select[open] summary .chevron {
+  transform: rotate(180deg);
+}
+
+.fw-menu {
+  position: absolute;
+  left: -0.375rem;
+  top: calc(100% + 6px);
+  min-width: 9rem;
+  background: var(--popover-bg);
+  border-radius: 0.75rem;
+  padding: 0.375rem;
+  box-shadow:
+    0 0 0 1px var(--ring),
+    0 1px 2px rgba(0, 0, 0, 0.05);
+  display: grid;
+  z-index: 20;
+  text-align: left;
+}
+
+.fw-option {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem 0.5rem 0.5rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.fw-option:hover:not(:disabled) {
+  background: var(--hover-wash);
+}
+
+.fw-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.fw-option .check {
+  margin-left: auto;
+  width: 1rem;
+  height: 1rem;
+  visibility: hidden;
+}
+
+html[data-fw='react'] .fw-option[data-fw='react'] .check,
+html[data-fw='vanilla'] .fw-option[data-fw='vanilla'] .check,
+html[data-fw='vue'] .fw-option[data-fw='vue'] .check,
+html[data-fw='svelte'] .fw-option[data-fw='svelte'] .check {
+  visibility: visible;
+}
+
+.fw-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+}
+
+/* The official marks have different aspect ratios; filling the box on both
+   axes (viewBox letterboxing centers them) keeps every logo the same optical
+   size and vertically aligned with the label. */
+.fw-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Framework tabs above each snippet group (FrameworkTabs.astro). The negative
+   bottom margin collapses into the code block's own, tucking the row to it. */
+.fw-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 1.25em 0 -0.625em;
+}
+
+.fw-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3rem 0.7rem 0.3rem 0.55rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: 0 0 0 1px var(--ring);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease-out,
+    color 0.16s ease-out;
+}
+
+.fw-tab .fw-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  filter: grayscale(1);
+  opacity: 0.7;
+  transition:
+    filter 0.16s ease-out,
+    opacity 0.16s ease-out;
+}
+
+.fw-tab:hover {
+  background: var(--hover-wash);
+  color: var(--text);
+}
+
+.fw-tab[aria-pressed='true'] {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  box-shadow: none;
+}
+
+.fw-tab[aria-pressed='true'] .fw-icon {
+  filter: none;
+  opacity: 1;
+}
+
+.fw-block {
+  display: none;
+}
+
+html[data-fw='react'] .fw-block[data-block='react'],
+html[data-fw='vanilla'] .fw-block[data-block='vanilla'],
+html[data-fw='vue'] .fw-block[data-block='vue'],
+html[data-fw='svelte'] .fw-block[data-block='svelte'] {
+  display: block;
+}
+
+/* The library's default card shadow (0.28 alpha) is tuned to read on dark; on
+   the light background it lands as a heavy halo. Soften it there with a tight
+   contact shadow plus a wide ambient one — via the same --crd-shadow knob the
+   docs hand to consumers. */
+:root[data-theme='light'] .crd {
+  --crd-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* ---- Top-right utilities: theme switch + Copy Page ---- */
+
+.top-utils {
+  position: absolute;
+  top: clamp(1.25rem, 3vw, 2rem);
+  right: clamp(1rem, 3vw, 2rem);
+  z-index: 30;
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.125rem;
+  border: 0;
+  border-radius: 0.625rem;
+  box-shadow: 0 0 0 1px var(--ring);
+  background: var(--hover-wash);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.16s ease-out;
+}
+
+.theme-toggle:hover {
+  background: var(--border-faint);
+}
+
+.theme-toggle svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Show the theme you'd switch to: sun while dark, moon while light. */
+.theme-toggle__moon {
+  display: none;
+}
+
+:root[data-theme='light'] .theme-toggle__sun {
+  display: none;
+}
+
+:root[data-theme='light'] .theme-toggle__moon {
+  display: block;
+}
+
+/* ---- Hero decor ---- */
+
+body {
+  position: relative;
+}
+
+/* WebGL light rays sweeping from the top-left corner (SideRays island from
+   React Bits; negative z-index keeps them under all in-flow content). The
+   mask fades them out before the playground so they never sit behind text. */
+.hero-rays {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56rem;
+  z-index: -1;
+  pointer-events: none;
+  display: none;
+  mask-image: linear-gradient(to bottom, #000 50%, transparent 92%);
+}
+
+@media (min-width: 64rem) {
+  .hero-rays {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-rays {
+    display: none;
+  }
+}
+
+/* Blur-in entrance for the hero pieces. */
+@keyframes hero-enter {
+  from {
+    opacity: 0;
+    filter: blur(12px);
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+.hero > * {
+  animation: hero-enter 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero > *:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.hero > *:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+.hero > *:nth-child(4) {
+  animation-delay: 0.36s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero > * {
+    animation: none;
+  }
+}
+
+/* ---- Hero ---- */
+
+.hero {
+  text-align: center;
+  padding-top: clamp(3rem, 7vw, 5.5rem);
+}
+
+.hero-card {
+  display: flex;
+  justify-content: center;
+  margin-bottom: clamp(2.5rem, 6vw, 4rem);
+  min-height: 195px;
+}
+
+.hero p.tagline {
+  margin: 0 auto 2rem;
+  color: var(--muted);
+  max-width: 28rem;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  text-wrap: balance;
+}
+
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* ---- Buttons (pill) ---- */
+
+.btn {
+  display: inline-flex;
+  height: 2.75rem;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 1.25rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    filter 0.16s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.16s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.16s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.25);
+}
+
+:root:not([data-theme='light']) .btn-primary:hover {
+  filter: none;
+  background: #fff;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--ring);
+}
+
+.btn-secondary:hover {
+  background: var(--hover-wash);
+}
+
+.btn code,
+.btn .cmd {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.85rem;
+}
+
+/* ---- Prose sections ---- */
+
+main section {
+  scroll-margin-top: 2.5rem;
+}
+
+.prose h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 4rem 0 1.25em;
+}
+
+.prose p {
+  color: var(--body);
+  margin: 0 0 1.25em;
+}
+
+.subhead {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 2.5rem 0 0.75em;
+}
+
+.ai-list {
+  color: var(--body);
+  margin: 0 0 1.25em;
+  padding-left: 1.25rem;
+}
+
+.ai-list li {
+  margin-bottom: 0.5em;
+}
+
+.ai-list li::marker {
+  color: var(--muted);
+}
+
+.prose a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--zinc-300);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition:
+    color 0.16s ease-out,
+    text-decoration-color 0.16s ease-out;
+}
+
+.prose a:hover {
+  text-decoration-color: currentColor;
+}
+
+:root:not([data-theme='light']) .prose a {
+  text-decoration-color: var(--zinc-600);
+}
+
+:not(pre) > code {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.875em;
+  color: var(--text);
+  background: var(--hover-wash);
+  border-radius: 0.375rem;
+  padding: 0.125rem 0.375rem;
+}
+
+/* ---- Code blocks ---- */
+
+.astro-code {
+  border-radius: 0.75rem;
+  box-shadow: 0 0 0 1px var(--ring);
+  padding: 1rem 1.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  margin: 1.25em 0;
+  /* Scroll genuinely long lines instead of wrapping them: wrapping breaks
+     dense one-liners mid-expression. Most snippets fit (props are one per
+     line), and horizontal scroll reads better on mobile. */
+  overflow-x: auto;
+}
+
+.astro-code code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Floating copy button injected on every code block. */
+.code-block {
+  position: relative;
+}
+
+.code-copy {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: var(--hover-wash);
+  box-shadow: 0 0 0 1px var(--ring);
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.16s ease-out,
+    color 0.16s ease-out;
+}
+
+.code-block:hover .code-copy,
+.code-copy:focus-visible,
+.code-copy.is-copied {
+  opacity: 1;
+}
+
+.code-copy:hover {
+  color: var(--text);
+}
+
+.code-copy svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+@media (hover: none) {
+  .code-copy {
+    opacity: 1;
+  }
+}
+
+:root:not([data-theme='light']) .astro-code {
+  background-color: var(--zinc-900) !important;
+}
+
+/* Tokens carry color only — a background here paints a lighter box behind
+   every span, which reads as accidental text selection. */
+:root:not([data-theme='light']) .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: transparent !important;
+}
+
+/* ---- ASCII sweep between framework snippets (src/lib/ascii-sweep.ts) ----
+   The real pre keeps the box; two transparent copies carry the outgoing and
+   incoming text, each masked to its side of the glyph band. */
+
+.code-block.is-sweeping > .astro-code {
+  overflow: hidden;
+}
+
+.code-block.is-sweeping > .astro-code:not(.sweep-layer) > code {
+  opacity: 0;
+}
+
+:root .code-block > .astro-code.sweep-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  background: transparent !important;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.sweep-layer--from {
+  -webkit-mask-image: linear-gradient(
+    var(--sweep-dir),
+    transparent calc(var(--sweep-x) + var(--sweep-jitter)),
+    #000 calc(var(--sweep-x) + var(--sweep-jitter) + var(--sweep-feather))
+  );
+  mask-image: linear-gradient(
+    var(--sweep-dir),
+    transparent calc(var(--sweep-x) + var(--sweep-jitter)),
+    #000 calc(var(--sweep-x) + var(--sweep-jitter) + var(--sweep-feather))
+  );
+}
+
+.sweep-layer--to {
+  -webkit-mask-image: linear-gradient(
+    var(--sweep-dir),
+    #000 calc(var(--sweep-x) - var(--sweep-tail)),
+    transparent calc(var(--sweep-x) - var(--sweep-band))
+  );
+  mask-image: linear-gradient(
+    var(--sweep-dir),
+    #000 calc(var(--sweep-x) - var(--sweep-tail)),
+    transparent calc(var(--sweep-x) - var(--sweep-band))
+  );
+}
+
+.sweep-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.sweep-page {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ---- Display-layout demo ---- */
+
+.display-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  margin: 1.5em 0;
+}
+
+.display-demo .btn {
+  min-width: 11rem;
+  justify-content: center;
+}
+
+/* ---- Playground demo panel ---- */
+
+/* On small screens the keyboard pushes the form up and the card would scroll
+   out of view — sticking it to the top keeps the live preview visible while
+   typing (slightly smaller so the focused input still fits below). */
+@media (max-width: 40rem) {
+  .playground-card {
+    position: sticky;
+    top: 0.75rem;
+    z-index: 5;
+  }
+
+  .playground-card .crd {
+    --crd-width: 240px;
+  }
+}
+
+.demo-panel {
+  display: grid;
+  gap: 2rem;
+  justify-items: center;
+  background: var(--bg);
+  border-radius: 1rem;
+  box-shadow: 0 0 0 1px var(--ring);
+  padding: 2rem 1.5rem;
+  margin: 1.25em 0;
+}
+
+.variant-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.375rem;
+}
+
+/* ---- Customize panel under the playground ---- */
+
+.customize {
+  width: 100%;
+  border-top: 1px solid var(--border-faint);
+  padding-top: 1.25rem;
+  display: grid;
+  gap: 0.875rem;
+}
+
+.customize__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.customize__head h3 {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.customize__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  background: var(--hover-wash);
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--ring);
+  cursor: pointer;
+  transition: background 0.16s ease-out;
+}
+
+.customize__copy:hover {
+  background: var(--bg);
+}
+
+.customize__copy svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.customize__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.customize__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* Small pill switch (used for the tilt toggle). */
+.switch {
+  position: relative;
+  width: 2.25rem;
+  height: 1.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--hover-wash);
+  box-shadow: inset 0 0 0 1px var(--ring);
+  cursor: pointer;
+  transition: background 0.2s ease-out;
+}
+
+.switch[aria-checked='true'] {
+  background: var(--accent);
+}
+
+.switch__thumb {
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease-out;
+}
+
+.switch[aria-checked='true'] .switch__thumb {
+  transform: translateX(1rem);
+}
+
+.variant-chip {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: 0 0 0 1px var(--ring);
+  cursor: pointer;
+  transition:
+    background 0.16s ease-out,
+    color 0.16s ease-out;
+}
+
+.variant-chip:hover {
+  background: var(--hover-wash);
+  color: var(--text);
+}
+
+.variant-chip[aria-pressed='true'] {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  box-shadow: none;
+}
+
+.demo-form {
+  display: grid;
+  gap: 0.875rem;
+  width: min(380px, 100%);
+  text-align: left;
+}
+
+.demo-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem;
+}
+
+.demo-form label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.demo-form input {
+  min-width: 0;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 1px var(--ring);
+  font: inherit;
+  font-size: 0.95rem;
+  background: transparent;
+  color: var(--text);
+}
+
+/* iOS Safari auto-zooms the page when a focused input's font-size is under
+   16px — meet the threshold on small screens so focusing never rescales. */
+@media (max-width: 40rem) {
+  .demo-form input {
+    font-size: 1rem;
+  }
+}
+
+.demo-form input::placeholder {
+  color: var(--zinc-400);
+}
+
+.demo-form input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* Card-number field: label on the left, test-card picker on the right. The
+   picker mirrors the masthead's framework <details> popover. */
+.field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.test-select {
+  position: relative;
+}
+
+.test-select summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.1rem 0.35rem;
+  margin-right: -0.35rem;
+  border-radius: 0.375rem;
+  color: var(--muted);
+  user-select: none;
+  transition: background 0.16s ease-out, color 0.16s ease-out;
+}
+
+.test-select summary::-webkit-details-marker {
+  display: none;
+}
+
+.test-select summary:hover,
+.test-select[open] summary {
+  background: var(--hover-wash);
+  color: var(--text);
+}
+
+.test-select .chevron {
+  width: 0.85rem;
+  height: 0.85rem;
+  transition: transform 0.15s ease-out;
+}
+
+.test-select[open] .chevron {
+  transform: rotate(180deg);
+}
+
+.test-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: var(--popover-bg);
+  border-radius: 0.75rem;
+  padding: 0.375rem;
+  box-shadow:
+    0 0 0 1px var(--ring),
+    0 1px 2px rgba(0, 0, 0, 0.05);
+  display: grid;
+  z-index: 20;
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.test-option {
+  display: grid;
+  grid-template-columns: 3.75rem 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8125rem;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.test-option:hover {
+  background: var(--hover-wash);
+}
+
+/* Fixed first column so every mark starts at the same x and the numbers line
+   up with them; the viewBox is cropped to the ink at runtime (see Playground)
+   so each mark sits flush left instead of trailing its original right anchor. */
+.test-option__logo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: var(--text);
+  overflow: hidden;
+}
+
+.test-option__logo svg {
+  display: block;
+  height: 0.8rem;
+  width: auto;
+  max-width: 100%;
+}
+
+.test-option__number {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  text-align: left;
+}
+
+/* ---- Background library ---- */
+
+.bg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin: 1.25em 0;
+}
+
+/* Tiles carry the card's own ratio and rounding so the grid reads as a shelf
+   of cards rather than a photo gallery. */
+.bg-tile {
+  position: relative;
+  display: block;
+  aspect-ratio: 1.586;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px var(--ring);
+  text-decoration: none;
+  transition: transform 0.16s ease-out;
+}
+
+.bg-tile:hover {
+  transform: translateY(-2px);
+}
+
+.bg-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Name + download affordance ride a scrim that only shows on hover/focus —
+   same reveal the code blocks' copy button uses, and forced on for touch. */
+.bg-tile__meta {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 0.5rem 0.4rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.16s ease-out;
+}
+
+.bg-tile:hover .bg-tile__meta,
+.bg-tile:focus-visible .bg-tile__meta {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .bg-tile__meta {
+    opacity: 1;
+  }
+}
+
+.bg-tile__icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex: 0 0 auto;
+}
+
+/* ---- Brand grid ---- */
+
+.brand-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1rem;
+  margin: 1.25em 0;
+}
+
+.brand-grid .crd {
+  --crd-width: 230px;
+  margin: 0 auto;
+}
+
+/* ---- Standalone doc pages (e.g. /migrate/react-credit-cards) ---- */
+
+/* The masthead is a link back home here rather than the framework picker. */
+.masthead__home {
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.masthead__home:hover {
+  text-decoration: underline;
+}
+
+/* Only these pages lead with an h1 — the homepage's sections start at h2. */
+.prose h1 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0 0 0.75em;
+}
+
+.prose ul {
+  padding-left: 1.25rem;
+  margin: 1.25em 0;
+  color: var(--body);
+}
+
+.prose li {
+  margin: 0.375em 0;
+}
+
+/* ---- API table ---- */
+
+.api-scroll {
+  overflow-x: auto;
+  margin: 1.25em 0;
+}
+
+.api-table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.api-table th:nth-child(1) {
+  width: 19%;
+}
+
+.api-table th:nth-child(2) {
+  width: 37%;
+}
+
+.api-table th,
+.api-table td {
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--border-faint);
+  vertical-align: top;
+}
+
+.api-table td {
+  color: var(--body);
+}
+
+.api-table th {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Long union/object types wrap at spaces so Description keeps its room;
+   prop names in the first column stay on one line. */
+.api-table td:first-child code {
+  white-space: nowrap;
+}
+
+/* ---- Left-gutter TOC (wide viewports only) ---- */
+
+.toc {
+  display: none;
+}
+
+@media (min-width: 74rem) {
+  .toc {
+    display: block;
+    position: fixed;
+    top: 10rem;
+    left: max(2.5rem, calc(50vw - 21rem - 12rem));
+    z-index: 5;
+  }
+}
+
+.toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  font-size: 0.875rem;
+  font-weight: 450;
+}
+
+/* Proximity effect adapted from React Bits' LineSidebar: a rAF loop in
+   TOC.astro eases a per-item --effect (0..1) from cursor distance and the
+   scrollspy's active state; label color/shift/opacity and the leading marker
+   lines all derive from that one variable. */
+.toc li {
+  position: relative;
+}
+
+.toc a {
+  display: inline-block;
+  color: color-mix(in srgb, var(--accent) calc(var(--effect, 0) * 100%), var(--text));
+  text-decoration: none;
+  opacity: calc(0.4 + var(--effect, 0) * 0.6);
+  transform: translateX(calc(var(--effect, 0) * 12px));
+}
+
+:root:not([data-theme='light']) .toc a {
+  opacity: calc(0.5 + var(--effect, 0) * 0.5);
+}
+
+/* Leading marker line per item. */
+.toc li::before {
+  content: '';
+  position: absolute;
+  left: -1.625rem;
+  top: 50%;
+  width: 1rem;
+  height: 1px;
+  background: color-mix(in srgb, var(--accent) calc(var(--effect, 0) * 100%), var(--muted));
+  opacity: calc(0.5 + var(--effect, 0) * 0.5);
+  transform: translateY(-50%) scaleX(calc(0.7 + var(--effect, 0) * 0.5));
+  transform-origin: left center;
+}
+
+/* Short tick between items, ruler-style. */
+.toc li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: -1.625rem;
+  top: calc(100% + 0.5rem);
+  width: 0.5rem;
+  height: 1px;
+  opacity: 0.35;
+  background: var(--muted);
+  transform: translateY(-50%) scaleX(calc(0.7 + var(--effect, 0) * 0.6));
+  transform-origin: left center;
+}
+
+/* ---- Bottom dock nav ---- */
+
+.dock-mask {
+  pointer-events: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 13rem;
+  z-index: 9;
+  background: linear-gradient(to top, var(--bg), transparent);
+}
+
+.dock {
+  pointer-events: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+  padding-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  display: flex;
+  justify-content: center;
+}
+
+.dock-inner {
+  pointer-events: auto;
+  max-width: calc(100% - 2rem);
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-radius: 1.375rem;
+  background: var(--dock-bg);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  padding: 0.375rem;
+  display: flex;
+}
+
+:root:not([data-theme='light']) .dock-inner {
+  box-shadow: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dock-inner::-webkit-scrollbar {
+  display: none;
+}
+
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 1rem;
+  padding: 0.625rem 1rem 0.375rem;
+  min-width: 5.6875em;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.16s ease-out;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  font-family: inherit;
+}
+
+/* A fifth item no longer fits the narrowest screens at full size. The dock
+   scrolls, but a permanently clipped item reads as broken — tighten the box
+   instead so all five sit inside it. */
+@media (max-width: 26rem) {
+  .dock-item {
+    min-width: 4.75em;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+.dock-item:hover {
+  color: var(--text);
+}
+
+.dock-item svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* ---- Footer ---- */
+
+.site-footer {
+  margin-top: 5rem;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.site-footer a {
+  color: inherit;
+}
+
+.site-footer a:hover {
+  color: var(--text);
+}
