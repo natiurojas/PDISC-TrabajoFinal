@@ -179,6 +179,7 @@ export interface MovieAccess {
   };
   streamUrl: string | null;
   playbackTtlSeconds: number;
+  rentDurationHours: number;
 }
 
 export interface CheckoutPayload {

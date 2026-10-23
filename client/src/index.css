@@ -107,7 +107,8 @@
 
   .badge,
   .badge-brand,
-  .badge-mint {
+  .badge-mint,
+  .badge-red {
     @apply inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold;
   }
 
@@ -121,6 +122,10 @@
 
   .badge-mint {
     @apply border-mint-500/40 bg-mint-500/10 text-mint-300;
+  }
+
+  .badge-red {
+    @apply border-red-500/40 bg-red-500/10 text-red-300;
   }
 
   .label {

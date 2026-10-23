@@ -8,6 +8,7 @@ import {
   DashboardIcon,
   LogoutIcon,
   MenuIcon,
+  ReceiptIcon,
   SearchIcon,
   ShieldIcon,
   UserIcon,
@@ -72,6 +73,11 @@ export function Header() {
           {user && (
             <NavLink to="/cuenta" className={navLinkClass}>
               Mi cuenta
+            </NavLink>
+          )}
+          {user && (
+            <NavLink to="/mis-compras" className={navLinkClass}>
+              Mis compras
             </NavLink>
           )}
         </nav>
@@ -143,6 +149,15 @@ export function Header() {
                     <UserIcon width={16} height={16} /> Mi cuenta
                   </Link>
 
+                  <Link
+                    to="/mis-compras"
+                    role="menuitem"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-cloud-200 transition hover:bg-ink-700/60"
+                  >
+                    <ReceiptIcon width={16} height={16} /> Mis compras
+                  </Link>
+
                   <button
                     type="button"
                     role="menuitem"
@@ -203,6 +218,11 @@ export function Header() {
             {user && (
               <NavLink to="/cuenta" className={navLinkClass} onClick={() => setMenuOpen(false)}>
                 Mi cuenta
+              </NavLink>
+            )}
+            {user && (
+              <NavLink to="/mis-compras" className={navLinkClass} onClick={() => setMenuOpen(false)}>
+                Mis compras
               </NavLink>
             )}
             {!user && (

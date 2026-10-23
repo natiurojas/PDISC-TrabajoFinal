@@ -9,7 +9,7 @@ import {
   type PurchaseKind,
 } from '../db/purchasesRepo.js';
 import type { Movie } from '../db/types.js';
-import { signPlaybackToken } from '../auth/playback.js';
+import { signPlaybackToken, PLAYBACK_TTL_SECONDS } from '../auth/playback.js';
 import { config } from '../config.js';
 import { ApiError } from '../lib/errors.js';
 import { requireParam } from '../lib/query.js';
@@ -97,7 +97,8 @@ paymentsRouter.get(
             source,
           },
       streamUrl: owned ? streamUrlFor(movie.id, user.id) : null,
-      playbackTtlSeconds: 6 * 60 * 60,
+      playbackTtlSeconds: PLAYBACK_TTL_SECONDS,
+      rentDurationHours: config.rentDurationHours,
     });
   }),
 );

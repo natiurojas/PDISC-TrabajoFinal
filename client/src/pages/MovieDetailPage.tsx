@@ -2,26 +2,49 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../lib/api';
 import { useAsync } from '../hooks/useAsync';
-import { formatDate, formatRuntime, formatScore } from '../lib/format';
+import { formatDate, formatDateTime, formatMoney, formatRuntime, formatScore } from '../lib/format';
+import { useAuth } from '../auth/AuthContext';
 import { VideoPlayer } from '../components/player/VideoPlayer';
 import { MovieCard } from '../components/movies/MovieCard';
 import { ErrorState, PageLoader } from '../components/ui';
-import { ArrowLeftIcon, CalendarIcon, ClockIcon, PlayIcon, TagIcon } from '../components/icons';
+import {
+  ArrowLeftIcon,
+  CalendarIcon,
+  ClockIcon,
+  LockIcon,
+  PlayIcon,
+  ShoppingBagIcon,
+  TagIcon,
+  TicketIcon,
+} from '../components/icons';
 
 export function MovieDetailPage() {
   const { slug = '' } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const [playing, setPlaying] = useState(searchParams.get('reproducir') === '1');
   const playerRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
 
   const movie = useAsync((signal) => api.movies.get(slug, signal), [slug]);
   const similar = useAsync((signal) => api.movies.similar(slug, 5, signal), [slug]);
+  const access = useAsync(
+    (signal) => (user ? api.payments.access(slug, signal) : Promise.resolve(null)),
+    [slug, user?.id],
+  );
 
   useEffect(() => {
     setPlaying(searchParams.get('reproducir') === '1');
   }, [searchParams]);
 
   function startPlaying() {
+    if (movie.status === 'success') {
+      const data = movie.data;
+      const owned = access.data?.entitlement.owned ?? false;
+      if (!owned && !data) return;
+      if (!owned) return;
+    } else {
+      return;
+    }
     setPlaying(true);
     setSearchParams({ reproducir: '1' }, { replace: true });
     window.setTimeout(() => playerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60);
@@ -47,6 +70,19 @@ export function MovieDetailPage() {
   }
 
   const data = movie.data;
+  const accessData = access.data;
+  const owned = accessData?.entitlement.owned ?? false;
+  const free = accessData?.free ?? false;
+  const canPlay = owned || free;
+  const streamUrl = accessData?.streamUrl ?? data.streamUrl;
+  const currency = accessData?.prices.currency ?? 'EUR';
+  const rentHours = accessData?.rentDurationHours ?? 48;
+
+  const isRentOwned =
+    owned && accessData?.entitlement.kind === 'rent' && accessData.entitlement.source === 'purchase';
+  const expiryText = isRentOwned && accessData?.entitlement.expiresAt
+    ? formatDateTime(accessData.entitlement.expiresAt)
+    : null;
 
   return (
     <article className="pb-12">
@@ -106,6 +142,14 @@ export function MovieDetailPage() {
                 </span>
                 {data.ageRating && <span className="badge">Clasificacion {data.ageRating}</span>}
                 {data.videoSource === 'local' && <span className="badge-mint">Archivo local</span>}
+                {free && <span className="badge-mint">Gratis</span>}
+                {isRentOwned && expiryText && <span className="badge-brand">Alquiler hasta {expiryText}</span>}
+                {owned && accessData?.entitlement.kind === 'buy' && (
+                  <span className="badge-brand">Compra permanente</span>
+                )}
+                {owned && accessData?.entitlement.source === 'staff' && (
+                  <span className="badge">Acceso equipo</span>
+                )}
               </div>
 
               {data.genres.length > 0 && (
@@ -125,10 +169,36 @@ export function MovieDetailPage() {
 
               <p className="mt-5 max-w-3xl leading-relaxed text-cloud-200">{data.synopsis}</p>
 
-              <div className="mt-7 flex flex-wrap gap-3">
-                <button type="button" onClick={startPlaying} className="btn-primary px-6 py-3">
-                  <PlayIcon width={18} height={18} /> Reproducir
-                </button>
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                {canPlay ? (
+                  <button type="button" onClick={startPlaying} className="btn-primary px-6 py-3">
+                    <PlayIcon width={18} height={18} /> Reproducir
+                  </button>
+                ) : user ? (
+                  <>
+                    {(accessData?.prices.rentCents ?? 0) > 0 && (
+                      <Link to={`/pago/${data.slug}?kind=rent`} className="btn-primary px-6 py-3">
+                        <TicketIcon width={18} height={18} /> Alquilar ·{' '}
+                        {formatMoney(accessData?.prices.rentCents ?? 0, currency)} · {rentHours} h
+                      </Link>
+                    )}
+                    {(accessData?.prices.buyCents ?? 0) > 0 && (
+                      <Link to={`/pago/${data.slug}?kind=buy`} className="btn-ghost px-6 py-3">
+                        <ShoppingBagIcon width={18} height={18} /> Comprar ·{' '}
+                        {formatMoney(accessData?.prices.buyCents ?? 0, currency)}
+                      </Link>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Link to={`/login?next=${encodeURIComponent(`/pago/${data.slug}?kind=rent`)}`} className="btn-primary px-6 py-3">
+                      <PlayIcon width={18} height={18} /> Iniciar sesion para ver
+                    </Link>
+                    <Link to={`/registro`} className="btn-ghost px-6 py-3">
+                      Crear cuenta
+                    </Link>
+                  </>
+                )}
                 <Link to={`/catalogo?genre=${encodeURIComponent(data.genres[0]?.slug ?? '')}`} className="btn-ghost px-6 py-3">
                   Generos similares
                 </Link>
@@ -139,26 +209,62 @@ export function MovieDetailPage() {
       </div>
 
       <div ref={playerRef} className="mx-auto mt-12 max-w-7xl px-4 sm:px-6">
-        {playing ? (
+        {canPlay && playing ? (
           <>
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-xl font-bold">Reproductor</h2>
               <span className="text-xs text-cloud-400">
                 Atajos: espacio (play/pausa) · flechas (avanzar) · m (silencio) · f (pantalla completa)
               </span>
             </div>
-            <VideoPlayer movie={data} />
+            <VideoPlayer movie={data} src={streamUrl} />
           </>
-        ) : (
+        ) : canPlay ? (
           <div className="card flex flex-col items-center gap-3 p-10 text-center">
             <PlayIcon width={30} height={30} className="text-brand-400" />
             <h2 className="text-lg font-semibold">Listo para ver</h2>
             <p className="max-w-md text-sm text-cloud-400">
-              El reproductor se carga bajo demanda para no consumir datos hasta que lo necesites.
+              Pulsa reproducir para cargar el reproductor con tu token de acceso.
             </p>
             <button type="button" onClick={startPlaying} className="btn-accent mt-2">
               Cargar reproductor
             </button>
+          </div>
+        ) : user ? (
+          <div className="card flex flex-col items-center gap-3 p-10 text-center">
+            <LockIcon width={28} height={28} className="text-brand-400" />
+            <h2 className="text-lg font-semibold">Alquila o compra para ver esta pelicula</h2>
+            <p className="max-w-lg text-sm text-cloud-400">
+              Selecciona una opcion arriba. El pago es simulado y el acceso queda vinculado a tu cuenta.
+            </p>
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+              {(accessData?.prices.rentCents ?? 0) > 0 && (
+                <Link to={`/pago/${data.slug}?kind=rent`} className="btn-primary px-6">
+                  <TicketIcon width={16} height={16} /> Alquilar {formatMoney(accessData?.prices.rentCents ?? 0, currency)} · {rentHours} h
+                </Link>
+              )}
+              {(accessData?.prices.buyCents ?? 0) > 0 && (
+                <Link to={`/pago/${data.slug}?kind=buy`} className="btn-ghost px-6">
+                  <ShoppingBagIcon width={16} height={16} /> Comprar {formatMoney(accessData?.prices.buyCents ?? 0, currency)}
+                </Link>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="card flex flex-col items-center gap-3 p-10 text-center">
+            <LockIcon width={28} height={28} className="text-brand-400" />
+            <h2 className="text-lg font-semibold">Inicia sesion para ver</h2>
+            <p className="max-w-md text-sm text-cloud-400">
+              Necesitas una cuenta para alquilar o comprar y reproducir el contenido.
+            </p>
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+              <Link to={`/login?next=${encodeURIComponent(`/pago/${data.slug}?kind=rent`)}`} className="btn-primary px-6">
+                Iniciar sesion
+              </Link>
+              <Link to={`/registro`} className="btn-ghost px-6">
+                Crear cuenta
+              </Link>
+            </div>
           </div>
         )}
       </div>
